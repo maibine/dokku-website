@@ -8,7 +8,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Test site with localizations',
+  title: 'Localized website',
   tagline: 'Check the site in other language',
   favicon: 'img/favicon.ico',
 
