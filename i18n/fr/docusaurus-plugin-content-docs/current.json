@@ -1,18 +1,18 @@
 {
   "version.label": {
-    "message": "Next",
-    "description": "The label for version current"
+    "message": "Suivant",
+    "description": "Le label pour la version actuelle"
   },
   "sidebar.tutorialSidebar.category.Tutorial - Basics": {
-    "message": "Tutorial - Basics",
-    "description": "The label for category Tutorial - Basics in sidebar tutorialSidebar"
+    "message": "Tutoriel - Bases",
+    "description": "Le label pour la catégorie Tutoriel - Bases dans la barre latérale tutorialSidebar"
   },
   "sidebar.tutorialSidebar.category.Tutorial - Basics.link.generated-index.description": {
-    "message": "5 minutes to learn the most important Docusaurus concepts.",
-    "description": "The generated-index page description for category Tutorial - Basics in sidebar tutorialSidebar"
+    "message": "5 minutes pour apprendre les concepts les plus importants de Docusaurus.",
+    "description": "La description de la page de l'index généré pour la catégorie Tutoriel - Bases dans la barre latérale tutorialSidebar"
   },
   "sidebar.tutorialSidebar.category.Tutorial - Extras": {
-    "message": "Tutorial - Extras",
-    "description": "The label for category Tutorial - Extras in sidebar tutorialSidebar"
+    "message": "Tutoriel - Extras",
+    "description": "Le label pour la catégorie Tutoriel - Extras dans la barre latérale tutorialSidebar"
   }
 }
