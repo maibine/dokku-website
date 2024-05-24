@@ -2,9 +2,9 @@
 sidebar_position: 1
 ---
 
-# Create a Page
+# Crea una pagina 
 
-Add **Markdown or React** files to `src/pages` to create a **standalone page**:
+Aggiungi **Markdown or React** files to `src/pages` to create a **standalone page**:
 
 - `src/pages/index.js` → `localhost:3000/`
 - `src/pages/foo.md` → `localhost:3000/foo`
