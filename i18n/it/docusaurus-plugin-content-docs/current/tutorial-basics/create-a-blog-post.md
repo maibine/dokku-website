@@ -2,33 +2,33 @@
 sidebar_position: 3
 ---
 
-# Create a Blog Post
+# Crea un post sul blog
 
-Docusaurus creates a **page for each blog post**, but also a **blog index page**, a **tag system**, an **RSS** feed...
+Docusaurus crea una **pagina per ogni post del blog**, ma anche una **pagina di indice del blog**, un **sistema di tag**, un feed **RSS**...
 
-## Create your first Post
+## Crea il tuo primo post
 
-Create a file at `blog/2021-02-28-greetings.md`:
+Crea un file in `blog/2021-02-28-greetings.md`:
 
 ```md title="blog/2021-02-28-greetings.md"
 ---
 slug: greetings
-title: Greetings!
+title: Saluti!
 authors:
   - name: Joel Marcey
-    title: Co-creator of Docusaurus 1
+    title: Co-creatore di Docusaurus 1
     url: https://github.com/JoelMarcey
     image_url: https://github.com/JoelMarcey.png
   - name: Sébastien Lorber
-    title: Docusaurus maintainer
+    title: Manutentore di Docusaurus
     url: https://sebastienlorber.com
     image_url: https://github.com/slorber.png
-tags: [greetings]
+tags: [saluti]
 ---
 
-Congratulations, you have made your first post!
+Congratulazioni, hai scritto il tuo primo post!
 
-Feel free to play around and edit this post as much as you like.
+Sentiti libero di sperimentare e modificare questo post quanto vuoi.
 ```
 
-A new blog post is now available at [http://localhost:3000/blog/greetings](http://localhost:3000/blog/greetings).
+Un nuovo post sul blog è ora disponibile su http://localhost:3000/blog/greetings.
