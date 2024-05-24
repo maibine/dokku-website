@@ -54,7 +54,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/maibine/dokku-website',
+            'https://github.com/maibine/dokku-website/blob/bd327d7c4b7890209334c091ab2bbf6b91cd0de3/',
           editLocalizedFiles: true,
         },
         // blog: {
