@@ -25,20 +25,22 @@ jobs:
             for FILE in $FILES; do
               BASENAME=$(basename $FILE)
               # Create issue for Italian translation
-              curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d @- <<EOF
+              curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d "$(cat <<EOF
               {
-                "title": "Translate \\"$BASENAME\\" to Italian",
+                "title": "Translate \"$BASENAME\" to Italian",
                 "body": "Please translate the new file \`$BASENAME\` located in the \`/docs\` folder to Italian.",
                 "labels": ["translation", "language:it"]
               }
 EOF
+              )"
               # Create issue for Romanian translation
-              curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d @- <<EOF
+              curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d "$(cat <<EOF
               {
-                "title": "Translate \\"$BASENAME\\" to Romanian",
+                "title": "Translate \"$BASENAME\" to Romanian",
                 "body": "Please translate the new file \`$BASENAME\` located in the \`/docs\` folder to Romanian.",
                 "labels": ["translation", "language:ro"]
               }
 EOF
+              )"
             done
           fi
