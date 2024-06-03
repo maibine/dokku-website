@@ -14,12 +14,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
+
       - name: Create translation issues
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-         run: |
+        run: |
           # Get the list of added files in the docs folder
           FILES=$(git diff --name-only HEAD~1 HEAD -- docs/ || true)
+          echo "Changed files: $FILES"
           if [ -n "$FILES" ]; then
             for FILE in $FILES; do
               BASENAME=$(basename $FILE)
