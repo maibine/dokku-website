@@ -18,23 +18,20 @@ jobs:
       - name: Create translation issues
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Ensure there are at least two commits to compare
-          if [ $(git rev-list --count HEAD) -gt 1 ]; then
-            # Get the list of added files in the docs folder
-            FILES=$(git diff --name-only HEAD~1 HEAD -- docs/ || true)
-            if [ -n "$FILES" ]; then
-              for FILE in $FILES; do
-                BASENAME=$(basename $FILE)
-                # Create issue for Italian translation
-                ITALIAN_PAYLOAD=$(printf '{"title":"Translate \"%s\" to Italian","body":"Please translate the new file `%s` located in the `/docs` folder to Italian.","labels":["translation","language:it"]}' "$BASENAME" "$BASENAME")
-                curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d "$ITALIAN_PAYLOAD"
-                
-                # Create issue for Romanian translation
-                ROMANIAN_PAYLOAD=$(printf '{"title":"Translate \"%s\" to Romanian","body":"Please translate the new file `%s` located in the `/docs` folder to Romanian.","labels":["translation","language:ro"]}' "$BASENAME" "$BASENAME")
-                curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d "$ROMANIAN_PAYLOAD"
-              done
-            fi
+         run: |
+          # Get the list of added files in the docs folder
+          FILES=$(git diff --name-only HEAD~1 HEAD -- docs/ || true)
+          if [ -n "$FILES" ]; then
+            for FILE in $FILES; do
+              BASENAME=$(basename $FILE)
+              # Create issue for Italian translation
+              ITALIAN_PAYLOAD=$(printf '{"title":"Translate \"%s\" to Italian","body":"Please translate the new file `%s` located in the `/docs` folder to Italian.","labels":["translation","language:it"]}' "$BASENAME" "$BASENAME")
+              curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d "$ITALIAN_PAYLOAD"
+              
+              # Create issue for Romanian translation
+              ROMANIAN_PAYLOAD=$(printf '{"title":"Translate \"%s\" to Romanian","body":"Please translate the new file `%s` located in the `/docs` folder to Romanian.","labels":["translation","language:ro"]}' "$BASENAME" "$BASENAME")
+              curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d "$ROMANIAN_PAYLOAD"
+            done
           else
-            echo "Not enough commits to perform a diff"
+            echo "No new files to translate"
           fi
