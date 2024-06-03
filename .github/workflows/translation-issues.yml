@@ -6,7 +6,8 @@ on:
       - 'docs/**' # Trigger the workflow when changes are made to files in the /docs folder
     branches:
       - main
-
+  workflow_dispatch:
+  
 jobs:
   create-issues:
     runs-on: ubuntu-latest
