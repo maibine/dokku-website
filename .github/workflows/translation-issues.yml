@@ -1,0 +1,44 @@
+name: Create Translation Issues
+
+on:
+  push:
+    paths:
+      - 'docs/**' # Trigger the workflow when changes are made to files in the /docs folder
+    branches:
+      - main
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Create translation issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the list of added files in the docs folder
+          FILES=$(git diff --name-only HEAD^ HEAD | grep '^docs/' || true)
+          if [ -n "$FILES" ]; then
+            for FILE in $FILES; do
+              BASENAME=$(basename $FILE)
+              # Create issue for Italian translation
+              curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d @- <<EOF
+              {
+                "title": "Translate \\"$BASENAME\\" to Italian",
+                "body": "Please translate the new file \`$BASENAME\` located in the \`/docs\` folder to Italian.",
+                "labels": ["translation", "language:it"]
+              }
+EOF
+              # Create issue for Romanian translation
+              curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d @- <<EOF
+              {
+                "title": "Translate \\"$BASENAME\\" to Romanian",
+                "body": "Please translate the new file \`$BASENAME\` located in the \`/docs\` folder to Romanian.",
+                "labels": ["translation", "language:ro"]
+              }
+EOF
+            done
+          fi
