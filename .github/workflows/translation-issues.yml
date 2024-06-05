@@ -30,17 +30,19 @@ jobs:
               BASENAME=$(basename $FILE)
               # Create issue for Italian translation
               ITALIAN_PAYLOAD=$(printf '{"title":"Translate `%s` to Italian","body":"Please translate the new file `%s` located in the `/docs` folder to Italian.","labels":["translation","language:it"]}' "$BASENAME" "$BASENAME")
-              AAA='{"title":"Found a bug","body":"I'\''m having a problem with this.","assignees":["maibine"],"labels":["translate"]}'
               curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d "$ITALIAN_PAYLOAD"
-              #curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d '{"title":"Found a bug","body":"I'\''m having a problem with this.","assignees":["maibine"],"labels":["translate"]}'
               
               # Create issue for Romanian translation
-              ROMANIAN_PAYLOAD=$(printf '{"title":"Translate \"%s\" to Romanian","body":"Please translate the new file `%s` located in the `/docs` folder to Romanian.","labels":["translation","language:ro"]}' "$BASENAME" "$BASENAME")
-              # curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d "$ROMANIAN_PAYLOAD"
+              ROMANIAN_PAYLOAD=$(printf '{"title":"Translate `%s` to Romanian","body":"Please translate the new file `%s` located in the `/docs` folder to Romanian.","labels":["translation","language:ro"]}' "$BASENAME" "$BASENAME")
+              curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d "$ROMANIAN_PAYLOAD"
+              
               # Debug: Print the JSON payloads
-              echo "Italian payload: $ITALIAN_PAYLOAD"
-              echo "Romanian payload: $ROMANIAN_PAYLOAD"
-              echo "AAA: $AAA"
+              AAA='{"title":"Found a bug","body":"I'\''m having a problem with this.","assignees":["maibine"],"labels":["translate"]}'
+              # echo "Italian payload: $ITALIAN_PAYLOAD"
+              # echo "Romanian payload: $ROMANIAN_PAYLOAD"
+              # echo "AAA: $AAA"
+              #curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/issues -d '{"title":"Found a bug","body":"I'\''m having a problem with this.","assignees":["maibine"],"labels":["translate"]}'
+
             done
           else
             echo "No new files to translate"
