@@ -4,6 +4,8 @@ sidebar_position: 1
 
 # Crea una pagina 
 
+New Line added by Rodica
+
 Aggiungi **Markdown or React** files to `src/pages` to creata a **standalone page**:
 
 - `src/pages/index.js` → `localhost:3000/`
