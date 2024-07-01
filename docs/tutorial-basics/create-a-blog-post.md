@@ -26,9 +26,9 @@ authors:
 tags: [greetings]
 ---
 
-Congratulations, you have made your first post!
+Congratulations, you have made your first post test!
 
 Feel free to play around and edit this post as much as you like.
 ```
 
-A new blog post is now available at [http://localhost:3000/blog/greetings](http://localhost:3000/blog/greetings).
+![](/img/it-IT/audittrail/audittrail.png)
