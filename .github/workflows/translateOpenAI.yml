@@ -1,0 +1,22 @@
+name: Translate Documentation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Translate Documentation
+      uses: maibine/git_training/TranslateActionSolution@master
+      with:
+        openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+        lang: 'en-US'
+        input_dir: './docs'
+        repo_dir: './'
