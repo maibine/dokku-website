@@ -1,8 +1,8 @@
 ---
-sidebar_position: 2
+sidebar_position: 3
 ---
 
-# Creaza un document nou
+# Creaza un document nou pe poziția 3
 
 Documentele sunt **grupuri de pagini** conectate prin:
 
