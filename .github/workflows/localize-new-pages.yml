@@ -61,25 +61,25 @@ jobs:
         git push origin "locale-${{ matrix.lang }}"
 
     - name: Create issues for translation review
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NEW_FILES: ${{ needs.detect-changes.outputs.new_files }}
       run: |
-        node -e "
-          const { Octokit } = require('@octokit/rest');
+        node -e '
+          const { Octokit } = require("@octokit/rest");
           const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-          const newFiles = '${{ needs.detect-changes.outputs.new_files }}'.split(' ');
+          const newFiles = process.env.NEW_FILES.split(" ");
 
           const createIssue = async () => {
             await octokit.issues.create({
               owner: "${{ github.repository_owner }}",
               repo: "${{ github.event.repository.name }}",
-              title: "Translate new pages to ${{ matrix.lang }}",
+              title: `Translate new pages to ${{ matrix.lang }}`,
               body: `The following new pages need to be translated to ${{ matrix.lang }}:${newFiles.map(file => `- [ ] i18n/${{ matrix.lang }}/docusaurus-plugin-content-docs/current/${file.replace("docs/", "")}`).join("\n")}`,
               labels: ["translation"],
-              assignees: ["Adi-Fluentis"]
+              assignees: ["team-member-username"]
             });
           };
 
-
           createIssue();
-        "
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        '
