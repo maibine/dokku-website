@@ -21,13 +21,13 @@ jobs:
       id: detect_changes
       run: |
         git config --global --add safe.directory /github/workspace
-        NEW_FILES=$(git diff --name-status HEAD~1 HEAD)
+        NEW_FILES=$(git diff --name-status HEAD~1 HEAD | grep '^A' | awk '{print $2}')
         if [ -z "$NEW_FILES" ]; then
           echo "No new files detected."
         else
           echo "New files detected: $NEW_FILES"
+          echo "new_files=$NEW_FILES" >> $GITHUB_OUTPUT
         fi
-        echo "new_files=$NEW_FILES" >> $GITHUB_OUTPUT
 
   localize:
     needs: detect-changes
