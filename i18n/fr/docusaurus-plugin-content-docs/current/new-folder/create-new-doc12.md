@@ -1,4 +1,4 @@
-# Créez un nouveau document à la position 10
+# Créez un nouveau document à la position 12
 
 Les documents sont des **groupes de pages** connectées par :
 
