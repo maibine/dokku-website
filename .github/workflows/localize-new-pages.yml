@@ -77,8 +77,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NEW_FILES: ${{ needs.detect-changes.outputs.new_files }}
       run: |
-        node -e '
-          const { Octokit } = require("@octokit/rest");
+        node -r esm -e '
+          import { Octokit } from "@octokit/rest";
           const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
           const newFiles = process.env.NEW_FILES.split(" ");
 
@@ -87,7 +87,7 @@ jobs:
               owner: "${{ github.repository_owner }}",
               repo: "${{ github.event.repository.name }}",
               title: `Translate new pages to ${{ matrix.lang }}`,
-              body: `The following new pages need to be translated to ${{ matrix.lang }}:${newFiles.map(file => `- [ ] i18n/${{ matrix.lang }}/docusaurus-plugin-content-docs/current/${file.replace("docs/", "")}`).join("\n")}`,
+              body: `The following new pages need to be translated to ${{ matrix.lang }}:\n${newFiles.map(file => `- [ ] i18n/${{ matrix.lang }}/docusaurus-plugin-content-docs/current/${file.replace("docs/", "")}`).join("\n")}`,
               labels: ["translation"],
               assignees: ["team-member-username"]
             });
