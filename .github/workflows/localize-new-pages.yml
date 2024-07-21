@@ -66,9 +66,11 @@ jobs:
       with:
         node-version: '18'
         cache: npm
-        
+
     - name: Install Octokit
-      run: npm install @octokit/rest
+      run: |
+        npm install @octokit/rest
+        npm audit fix
 
     - name: Create issues for translation review
       env:
