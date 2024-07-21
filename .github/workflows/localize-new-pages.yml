@@ -72,26 +72,12 @@ jobs:
         npm install @octokit/rest
         npm audit fix
 
-    - name: Create issues for translation review
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NEW_FILES: ${{ needs.detect-changes.outputs.new_files }}
-      run: |
-        node -r esm -e '
-          import { Octokit } from "@octokit/rest";
-          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-          const newFiles = process.env.NEW_FILES.split(" ");
-
-          const createIssue = async () => {
-            await octokit.issues.create({
-              owner: "${{ github.repository_owner }}",
-              repo: "${{ github.event.repository.name }}",
-              title: `Translate new pages to ${{ matrix.lang }}`,
-              body: `The following new pages need to be translated to ${{ matrix.lang }}:\n${newFiles.map(file => `- [ ] i18n/${{ matrix.lang }}/docusaurus-plugin-content-docs/current/${file.replace("docs/", "")}`).join("\n")}`,
-              labels: ["translation"],
-              assignees: ["team-member-username"]
-            });
-          };
-
-          createIssue();
-        '
+        - name: Create issues for translation review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_FILES: ${{ needs.detect-changes.outputs.new_files }}
+          LANG: ${{ matrix.lang }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
+        run: |
+          node -r esm scripts/create-issue.js
