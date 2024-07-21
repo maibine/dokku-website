@@ -11,7 +11,9 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2 # Fetch enough history to include the previous commit
 
     - name: Translate Documentation
       uses: maibine/git_training/TranslateActionSolution@master
