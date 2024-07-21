@@ -34,6 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
+      contents: write
     if: needs.detect-changes.outputs.new_files != ''
     strategy:
       matrix:
