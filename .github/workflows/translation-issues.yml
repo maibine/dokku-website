@@ -1,11 +1,11 @@
 name: Create Translation Issues
 
 on:
-  push:
-    paths:
-      - 'docs/**' # Trigger the workflow when changes are made to files in the /docs folder
-    branches:
-      - main
+#  push:
+#    paths:
+#      - 'docs/**' # Trigger the workflow when changes are made to files in the /docs folder
+#    branches:
+#      - main
   workflow_dispatch:
 
 jobs:
