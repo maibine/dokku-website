@@ -1,0 +1,81 @@
+name: Localize New Pages
+
+on:
+#   push:
+#     branches:
+#       - main
+  workflow_dispatch:
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      new_files: ${{ steps.detect_changes.outputs.new_files }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Detect new localized pages
+      id: detect_changes
+      run: |
+        git config --global --add safe.directory /github/workspace
+        NEW_FILES=$(git diff --name-status HEAD~1 HEAD | grep '^A' | grep '^docs/' | cut -f2)
+        echo "new_files=$NEW_FILES" >> $GITHUB_ENV
+        echo "::set-output name=new_files::$NEW_FILES"
+
+  localize:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.new_files != ''
+    strategy:
+      matrix:
+        lang: ["fr", "it"]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Translate new files
+      uses: maibine/git_training/TranslateActionSolution@master
+      with:
+        openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+        lang: ${{ matrix.lang }}
+        input_dir: "./docs"
+        repo_dir: "$(pwd)"
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git checkout -b "locale-${{ matrix.lang }}" || git checkout "locale-${{ matrix.lang }}"
+        git add "i18n/${{ matrix.lang }}/docusaurus-plugin-content-docs/current"
+        git commit -m "Add new localized pages for ${{ matrix.lang }}"
+        git push origin "locale-${{ matrix.lang }}"
+
+    - name: Create issues for translation review
+      run: |
+        node -e "
+          const { Octokit } = require('@octokit/rest');
+          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+          const newFiles = '${{ needs.detect-changes.outputs.new_files }}'.split(' ');
+
+          const createIssue = async () => {
+            await octokit.issues.create({
+              owner: "${{ github.repository_owner }}",
+              repo: "${{ github.event.repository.name }}",
+              title: "Translate new pages to ${{ matrix.lang }}",
+              body: `The following new pages need to be translated to ${{ matrix.lang }}:${newFiles.map(file => `- [ ] i18n/${{ matrix.lang }}/docusaurus-plugin-content-docs/current/${file.replace("docs/", "")}`).join("\n")}`,
+              labels: ["translation"],
+              assignees: ["Adi-Fluentis"]
+            });
+          };
+
+
+          createIssue();
+        "
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
