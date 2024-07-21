@@ -1,10 +1,10 @@
 name: copy markdown files
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'docs/**/*.md' # Trigger the workflow when changes are made to files in the /docs folder
-      - 'docs/**/*.mdx' # Trigger the workflow when changes are made to files in the /docs folder
+#  push:
+#    branches: [ main ]
+#    paths:
+#      - 'docs/**/*.md' # Trigger the workflow when changes are made to files in the /docs folder
+#      - 'docs/**/*.mdx' # Trigger the workflow when changes are made to files in the /docs folder
   workflow_dispatch:
 jobs:
   copy-test:
