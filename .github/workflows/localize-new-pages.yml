@@ -67,17 +67,17 @@ jobs:
         node-version: '18'
         cache: npm
 
-    - name: Install Octokit
+    - name: Install Dependencies
       run: |
-        npm install @octokit/rest
+        npm install @octokit/rest esm
         npm audit fix
-
-        - name: Create issues for translation review
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEW_FILES: ${{ needs.detect-changes.outputs.new_files }}
-          LANG: ${{ matrix.lang }}
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
-          GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
-        run: |
-          node -r esm scripts/create-issue.js
+  
+    - name: Create issues for translation review
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NEW_FILES: ${{ needs.detect-changes.outputs.new_files }}
+        LANG: ${{ matrix.lang }}
+        GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
+      run: |
+        node -r esm scripts/create-issue.js
