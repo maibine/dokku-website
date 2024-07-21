@@ -32,6 +32,8 @@ jobs:
   localize:
     needs: detect-changes
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     if: needs.detect-changes.outputs.new_files != ''
     strategy:
       matrix:
@@ -61,23 +63,19 @@ jobs:
         git commit -m "Add new localized pages for ${{ matrix.lang }}"
         git push origin "locale-${{ matrix.lang }}"
 
-    - name: Set up Node.js environment
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: npm
-
-    - name: Install Dependencies
-      run: |
-        npm install @octokit/rest esm
-        npm audit fix
-  
     - name: Create issues for translation review
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NEW_FILES: ${{ needs.detect-changes.outputs.new_files }}
         LANG: ${{ matrix.lang }}
-        GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
-        GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
       run: |
-        node -r esm scripts/create-issue.js
+        new_files=$(echo $NEW_FILES | tr ' ' '\n')
+        body="The following new pages need to be translated to $LANG:\n\n"
+        for file in $new_files; do
+        body+="- [ ] i18n/$LANG/docusaurus-plugin-content-docs/current/${file/docs\//}\n"
+        done
+        gh issue create \
+        --title "Translate new pages to $LANG" \
+        --assignee "Adi-Fluentis" \
+        --label "translation" \
+        --body "$body"
