@@ -49,7 +49,7 @@ jobs:
         openai_api_key: ${{ secrets.OPENAI_API_KEY }}
         lang: ${{ matrix.lang }}
         input_dir: "./docs"
-        repo_dir: "$(pwd)"
+        repo_dir: ${{ github.workspace }}
 
     - name: Commit and push changes
       run: |
