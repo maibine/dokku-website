@@ -61,6 +61,15 @@ jobs:
         git commit -m "Add new localized pages for ${{ matrix.lang }}"
         git push origin "locale-${{ matrix.lang }}"
 
+    - name: Set up Node.js environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: npm
+        
+    - name: Install Octokit
+      run: npm install @octokit/rest
+
     - name: Create issues for translation review
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
