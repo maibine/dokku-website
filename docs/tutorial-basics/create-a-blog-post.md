@@ -26,7 +26,7 @@ authors:
 tags: [greetings]
 ---
 
-Congratulations, you have made your first post test!
+Congratulations test change, you have made your first post test ceva!
 
 Feel free to play around and edit this post as much as you like.
 ```
