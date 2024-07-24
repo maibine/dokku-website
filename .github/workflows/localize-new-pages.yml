@@ -73,7 +73,7 @@ jobs:
         LANG: ${{ matrix.lang }}
       run: |
         new_files=$(echo $NEW_FILES | tr ' ' '\n')
-        body="The following new pages need to be translated to $LANG:\n\n"
+        body="The following new pages translated to $LANG need to be reviewed:\n"
         for file in $new_files; do
         body+="- [ ] i18n/$LANG/docusaurus-plugin-content-docs/current/${file/docs\//}\n"
         done
