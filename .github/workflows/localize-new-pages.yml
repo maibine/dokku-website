@@ -8,36 +8,11 @@ on:
       - 'docs/**' # Trigger the workflow when changes are made to files in the /docs folder
   workflow_dispatch:
 jobs:
-  detect-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      new_files: ${{ steps.detect_changes.outputs.new_files }}
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Detect new localized pages
-      id: detect_changes
-      run: |
-        git config --global --add safe.directory /github/workspace
-        NEW_FILES=$(git diff --name-status HEAD~1 HEAD | grep '^A' | awk '{print $2}')
-        if [ -z "$NEW_FILES" ]; then
-          echo "No new files detected."
-        else
-          echo "New files detected: $NEW_FILES"
-          echo "new_files=$NEW_FILES" >> $GITHUB_OUTPUT
-        fi
-
   localize:
-    needs: detect-changes
     runs-on: ubuntu-latest
     permissions:
       issues: write
       contents: write
-    if: needs.detect-changes.outputs.new_files != ''
     strategy:
       matrix:
         lang: ["fr", "it"]
@@ -47,6 +22,19 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
+    - name: Get new files
+      id: new_files
+      run: |
+        NEW_FILES=$(git diff --name-status HEAD~1 HEAD | grep '^A' | awk '{print $2}')
+        if [ -z "$NEW_FILES" ]; then
+        echo "No new files detected."
+        exit 1
+        else
+        echo "New files detected: $NEW_FILES"
+        NEW_FILES=$(echo "$NEW_FILES" | tr '\n' ' ')
+        echo "new_files=$NEW_FILES" >> $GITHUB_ENV
+        fi
 
     - name: Translate new files
       uses: maibine/git_training/TranslateActionSolution@master
@@ -69,7 +57,7 @@ jobs:
     - name: Create issues for translation review
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NEW_FILES: ${{ needs.detect-changes.outputs.new_files }}
+        NEW_FILES: ${{ env.new_files }}
         LANG: ${{ matrix.lang }}
       run: |
         new_files=$(echo $NEW_FILES | tr ' ' '\n')
