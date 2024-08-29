@@ -29,7 +29,7 @@ jobs:
         NEW_FILES=$(git diff --name-status HEAD~1 HEAD | grep '^A' | awk '{print $2}')
         if [ -z "$NEW_FILES" ]; then
         echo "No new files detected."
-        exit 0
+        exit 1
         else
         echo "New files detected: $NEW_FILES"
         NEW_FILES=$(echo "$NEW_FILES" | tr '\n' ' ')
@@ -37,6 +37,7 @@ jobs:
         fi
 
     - name: Translate new files
+      if: steps.new_files.conclusion == 'success'
       uses: maibine/git_training/TranslateActionSolution@master
       with:
         openai_api_key: ${{ secrets.OPENAI_API_KEY }}
@@ -45,6 +46,7 @@ jobs:
         repo_dir: './'
 
     - name: Commit and push changes
+      if: steps.new_files.conclusion == 'success'
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
@@ -55,6 +57,7 @@ jobs:
         git push origin "locale-${{ matrix.lang }}"
 
     - name: Create issues for translation review
+      if: steps.new_files.conclusion == 'success'
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NEW_FILES: ${{ env.new_files }}
