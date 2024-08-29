@@ -29,7 +29,7 @@ jobs:
         NEW_FILES=$(git diff --name-status HEAD~1 HEAD | grep '^A' | awk '{print $2}')
         if [ -z "$NEW_FILES" ]; then
         echo "No new files detected."
-        exit 1
+        exit 0
         else
         echo "New files detected: $NEW_FILES"
         NEW_FILES=$(echo "$NEW_FILES" | tr '\n' ' ')
