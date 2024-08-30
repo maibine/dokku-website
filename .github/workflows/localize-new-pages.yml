@@ -68,15 +68,28 @@ jobs:
         NEW_FILES: ${{ env.new_files }}
         LANG: ${{ matrix.lang }}
       run: |
-        new_files=$(echo $NEW_FILES | tr ' ' '\n')
-        #body="The following new pages translated to $LANG need to be reviewed:\n"
+        # Convert the space-separated list of new files into newline-separated list
+        new_files=$(echo "$NEW_FILES" | tr ' ' '\n')
+        
+        # Initialize the body with the first line using printf and single quotes
         body=$(printf 'The following new pages translated to %s need to be reviewed:\n' "$LANG")
+        
+        # Append each file to the body with proper formatting
         for file in $new_files; do
-        body+="- [${file/docs\//}](../edit/locale-$LANG/i18n/$LANG/docusaurus-plugin-content-docs/current/${file/docs\//})\n"
+          body+=$(printf '- [%s](../edit/locale-%s/i18n/%s/docusaurus-plugin-content-docs/current/%s)\n' "${file/docs\//}" "$LANG" "$LANG" "${file/docs\//}")
         done
-        # Use printf to handle the new lines correctly
-        printf "%s" "$body" | gh issue create \
-        --title "Translate new pages to $LANG" \
-        --assignee "Adi-Fluentis" \
-        --label "translation" \
-        --body-file -
+        
+        # Write the body to a temporary file
+        temp_file=$(mktemp)
+        printf '%s' "$body" > "$temp_file"
+        
+        # Create the GitHub issue using the temporary file for the body
+        gh issue create \
+          --title "Translate new pages to $LANG" \
+          --assignee "Adi-Fluentis" \
+          --label "translation" \
+          --body-file "$temp_file"
+        
+        # Clean up the temporary file
+        rm "$temp_file"
+
