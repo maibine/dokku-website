@@ -6,8 +6,6 @@ on:
       - main
     paths:
       - 'docs/**' # Trigger the workflow when changes are made to files in the /docs folder
-    paths-ignore:
-      - '**/*' # Adjust this if you want to ignore more paths, or remove if not needed
   workflow_dispatch:
 jobs:
   localize:
