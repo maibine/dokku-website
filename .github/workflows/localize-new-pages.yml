@@ -52,6 +52,7 @@ jobs:
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git checkout -b "locale-${{ matrix.lang }}" || git checkout "locale-${{ matrix.lang }}"
         git pull origin "locale-${{ matrix.lang }}" --rebase
+        git merge main
         git add "i18n/${{ matrix.lang }}/docusaurus-plugin-content-docs/current"
         git commit -m "Add new localized pages for ${{ matrix.lang }}"
         git push origin "locale-${{ matrix.lang }}"
