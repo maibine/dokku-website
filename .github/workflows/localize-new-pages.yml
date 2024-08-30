@@ -71,7 +71,7 @@ jobs:
         new_files=$(echo $NEW_FILES | tr ' ' '\n')
         body="The following new pages translated to $LANG need to be reviewed:\n"
         for file in $new_files; do
-        body+="- [ ] i18n/$LANG/docusaurus-plugin-content-docs/current/${file/docs\//}\n"
+        body+="- [${file/docs\//}](../edit/locale-$LANG/i18n/$LANG/docusaurus-plugin-content-docs/current/${file/docs\//})\n"
         done
         # Use printf and command substitution to pass the body directly
         gh issue create \
