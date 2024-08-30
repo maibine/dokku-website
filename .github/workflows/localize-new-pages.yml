@@ -82,9 +82,14 @@ jobs:
           # Debug: Print processed file name to check correctness
           echo "DEBUG: Processed file - $processed_file"
           
+          # Ensure no unexpected characters or options in the formatted line
+          formatted_line=$(printf '* [%s](../edit/locale-%s/i18n/%s/docusaurus-plugin-content-docs/current/%s)\n' "$processed_file" "$LANG" "$LANG" "$processed_file")
+
+          # Debug: Print formatted line to check correctness
+          echo "DEBUG: Formatted line - $formatted_line"
+
           # Append formatted entry to the body
-          # Fixed: Ensured no extra escape characters
-          body+=$(printf '- [%s](../edit/locale-%s/i18n/%s/docusaurus-plugin-content-docs/current/%s)\n' "$processed_file" "$LANG" "$LANG" "$processed_file")
+          body+="$formatted_line"
         done
 
         # Debug: Print the body to verify content
