@@ -78,9 +78,17 @@ jobs:
         for file in $new_files; do
           # Remove 'docs/' prefix from file paths
           processed_file=$(echo "$file" | sed 's/^docs\///')
+          
+          # Debug: Print processed file name to check correctness
+          echo "DEBUG: Processed file - $processed_file"
+          
           # Append formatted entry to the body
+          # Fixed: Ensured no extra escape characters
           body+=$(printf '- [%s](../edit/locale-%s/i18n/%s/docusaurus-plugin-content-docs/current/%s)\n' "$processed_file" "$LANG" "$LANG" "$processed_file")
         done
+
+        # Debug: Print the body to verify content
+        echo "DEBUG: Body content - $body"
 
         # Write the body to a temporary file
         temp_file=$(mktemp)
