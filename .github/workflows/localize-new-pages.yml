@@ -82,29 +82,25 @@ jobs:
           # Debug: Print processed file name to check correctness
           echo "DEBUG: Processed file - $processed_file"
           
-          # Ensure no unexpected characters or options in the formatted line
-          formatted_line=$(printf '* [%s](../edit/locale-%s/i18n/%s/docusaurus-plugin-content-docs/current/%s)\n' "$processed_file" "$LANG" "$LANG" "$processed_file")
-
-          # Debug: Print formatted line to check correctness
-          echo "DEBUG: Formatted line - $formatted_line"
-
-          # Append formatted entry to the body
-          body+="$formatted_line"
+          body+=$(echo -e "- [${processed_file}](../edit/locale-${LANG}/i18n/${LANG}/docusaurus-plugin-content-docs/current/${processed_file})\n")
         done
-
-        # Debug: Print the body to verify content
-        echo "DEBUG: Body content - $body"
 
         # Write the body to a temporary file
         temp_file=$(mktemp)
-        printf '%s' "$body" > "$temp_file"
+        echo -e "$body" > "$temp_file"
+
+        # Export the content of the temporary file
+        export msg=$(cat "$temp_file")
+
+        # Debug: Print the body content from the file to verify new lines
+        echo "DEBUG: Body content - $msg"
 
         # Create the GitHub issue using the temporary file for the body
         gh issue create \
           --title "Translate new pages to $LANG" \
           --assignee "Adi-Fluentis" \
           --label "translation" \
-          --body-file "$temp_file"
+          --body "$msg"
 
         # Clean up the temporary file
         rm "$temp_file"
