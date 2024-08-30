@@ -72,7 +72,7 @@ jobs:
         new_files=$(echo "$NEW_FILES" | tr ' ' '\n')
 
         # Initialize the body with the first line using printf
-        body=$(printf 'The following new pages translated to %s need to be reviewed:\n' "$LANG")
+        body=$("The following new pages auto translated to ${LANG} need to be reviewed:\n")
 
         # Append each file to the body with proper formatting
         for file in $new_files; do
@@ -82,8 +82,10 @@ jobs:
           # Debug: Print processed file name to check correctness
           echo "DEBUG: Processed file - $processed_file"
           
-          body+=$(echo -e "- [${processed_file}](../edit/locale-${LANG}/i18n/${LANG}/docusaurus-plugin-content-docs/current/${processed_file})\n")
+          body+=$("- [${processed_file}](../edit/locale-${LANG}/i18n/${LANG}/docusaurus-plugin-content-docs/current/${processed_file})\n \n")
         done
+
+        echo "DEBUG: Body content1 - $body"
 
         # Write the body to a temporary file
         temp_file=$(mktemp)
@@ -93,11 +95,11 @@ jobs:
         export msg=$(cat "$temp_file")
 
         # Debug: Print the body content from the file to verify new lines
-        echo "DEBUG: Body content - $msg"
+        echo "DEBUG: Body content2 - $msg"
 
         # Create the GitHub issue using the temporary file for the body
         gh issue create \
-          --title "Translate new pages to $LANG" \
+          --title ""$LANG" - Review new translated pages" \
           --assignee "Adi-Fluentis" \
           --label "translation" \
           --body "$msg"
