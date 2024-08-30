@@ -73,8 +73,9 @@ jobs:
         for file in $new_files; do
         body+="- [ ] i18n/$LANG/docusaurus-plugin-content-docs/current/${file/docs\//}\n"
         done
+        # Use printf and command substitution to pass the body directly
         gh issue create \
         --title "Translate new pages to $LANG" \
         --assignee "Adi-Fluentis" \
         --label "translation" \
-        --body "$body"
+        --body "$(printf "%s" "$body")"
