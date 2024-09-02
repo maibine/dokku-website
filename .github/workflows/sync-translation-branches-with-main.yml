@@ -35,6 +35,13 @@ jobs:
             git fetch origin $branch
             git checkout $branch
 
+            # Check for changes between the branch and the main branch
+            git fetch origin main
+            if git diff --quiet origin/main..$branch; then
+              echo "No changes between $branch and main. Skipping merge."
+              continue
+            fi
+
             # Try to merge the main branch into the translation branch
             if ! git merge origin/main --no-ff -m "Sync $branch with main"; then
               # If there's a merge conflict, abort the merge
