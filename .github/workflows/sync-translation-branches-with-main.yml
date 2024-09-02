@@ -21,7 +21,7 @@ jobs:
         id: get-branches
         run: |
           # Get all branches starting with 'locale-'
-          TRANSLATION_BRANCHES=$(git ls-remote --heads origin 'locale-*' | awk -F'/' '{print $NF}')
+          TRANSLATION_BRANCHES=$(git ls-remote --heads origin 'locale-*' | awk -F'/' '{print $NF}' | tr '\n' ' ')
           echo "TRANSLATION_BRANCHES=$TRANSLATION_BRANCHES" >> $GITHUB_ENV
 
       - name: Sync Translation Branches
