@@ -1,0 +1,17 @@
+---
+sidebar_position: 2
+---
+
+# Créer un nouveau document
+
+Les documents sont des **groupes de pages** connectées par :
+
+- une **barre latérale**
+- **navigation précédente/suivante**
+- **versioning**
+
+## Créer le deuxième document
+
+```md title="docs/hello.md"
+# Bonjour
+```
