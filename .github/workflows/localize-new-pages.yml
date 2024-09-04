@@ -67,6 +67,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NEW_FILES: ${{ env.new_files }}
         LANG: ${{ matrix.lang }}
+        REPO: ${{ github.repository }}
       run: |
         # Convert the space-separated list of new files into newline-separated list
         new_files=$(echo "$NEW_FILES" | tr ' ' '\n')
