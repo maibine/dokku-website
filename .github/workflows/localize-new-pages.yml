@@ -82,7 +82,7 @@ jobs:
           # Debug: Print processed file name to check correctness
           echo "DEBUG: Processed file - $processed_file"
           
-          body+="- [${processed_file}](../edit/locale-${LANG}/i18n/${LANG}/docusaurus-plugin-content-docs/current/${processed_file})\n"
+          body+="- [${processed_file}](https://github.com/${REPO}/edit/locale-${LANG}/i18n/${LANG}/docusaurus-plugin-content-docs/current/${processed_file})\n"
         done
 
         echo "DEBUG: Body content1 - $body"
