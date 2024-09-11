@@ -1,0 +1,35 @@
+name: copy markdown files
+on:
+#  push:
+#    branches: [ main ]
+#    paths:
+#      - 'docs/**/*.md' # Trigger the workflow when changes are made to files in the /docs folder
+#      - 'docs/**/*.mdx' # Trigger the workflow when changes are made to files in the /docs folder
+  workflow_dispatch:
+jobs:
+  copy-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install rsync
+      run: sudo apt-get install -y rsync
+    - name: Make the script files executable
+      run: |
+        chmod +x scripts/sync_files.sh
+    - name: Copy the markdown files
+      #working-directory: ./scripts
+      run: |
+        bash ./scripts/sync_files.sh
+      env:
+        SOURCE_DIR: "${{ github.workspace }}/docs"
+        DEST_DIRS: "${{ github.workspace }}/i18n/fr/docusaurus-plugin-content-docs/current ${{ github.workspace }}/i18n/it/docusaurus-plugin-content-docs/current"
+    - name: Commit files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Copy new files from docs to localization folders" -a
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}

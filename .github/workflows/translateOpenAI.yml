@@ -1,0 +1,24 @@
+name: Translate Documentation
+
+on:
+#  push:
+#    branches:
+#      - main
+  workflow_dispatch:
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Fetch enough history to include the previous commit
+
+    - name: Translate Documentation
+      uses: maibine/git_training/TranslateActionSolution@master
+      with:
+        openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+        lang: 'en-US'
+        input_dir: './docs'
+        repo_dir: './'

@@ -1,0 +1,59 @@
+name: Sync Translations with main
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on every push to the main branch
+
+jobs:
+  sync-translations:
+    runs-on: ubuntu-latest
+    permissions:
+        contents: write # Ensures the workflow has write access to the contents of the repository
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+            git config --global user.name 'github-actions[bot]'
+            git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+  
+      - name: Get Translation Branches
+        id: get-branches
+        run: |
+          # Get all branches starting with 'locale-'
+          TRANSLATION_BRANCHES=$(git ls-remote --heads origin 'locale-*' | awk -F'/' '{print $NF}' | tr '\n' ' ')
+          echo "TRANSLATION_BRANCHES=$TRANSLATION_BRANCHES" >> $GITHUB_ENV
+
+      - name: Sync Translation Branches
+        run: |
+          for branch in ${TRANSLATION_BRANCHES}; do
+            git fetch origin $branch
+            git checkout $branch
+
+            # Check for changes between the branch and the main branch
+            git fetch origin main
+            if git diff --quiet origin/main..$branch; then
+              echo "No changes between $branch and main. Skipping merge."
+              continue
+            fi
+
+            # Try to merge the main branch into the translation branch
+            if ! git merge origin/main --no-ff -m "Sync $branch with main"; then
+              # If there's a merge conflict, abort the merge
+              git merge --abort
+
+              # Create a Pull Request for manual conflict resolution
+              echo "Creating Pull Request for $branch due to merge conflicts"
+              gh pr create --title "Sync $branch with main - Conflict Resolution Required" \
+                           --body "This PR was automatically created due to merge conflicts between main and $branch. Please resolve the conflicts manually." \
+                           --base $branch --head main
+            else
+              # If merge succeeds, push the changes
+              git push origin $branch
+            fi
+          done
