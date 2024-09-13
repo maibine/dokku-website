@@ -65,7 +65,7 @@ jobs:
             if [ -n "$(git status --porcelain)" ]; then
             git add i18n/
             git commit -m "Add new or modified files for translation to ${LANG} branch"
-            git push origin "$BRANCH_NAME"
+            git push --set-upstream origin "$BRANCH_NAME"
             else
             echo "No new or modified files to commit."
             fi
