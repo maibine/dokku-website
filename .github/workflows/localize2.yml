@@ -73,21 +73,27 @@ jobs:
 
       - name: Insert language code at the beginning of new files
         run: |
-          LANG="${{ matrix.lang }}"
-          # Find all new or modified files in the localization folder
-          for file in $(git diff --name-only HEAD^ HEAD -- "i18n/${LANG}/docusaurus-plugin-content-docs-current/**/*.md"); do
-            # Prepend the language code at the beginning of each file
-            echo "${LANG}" | cat - "$file" > temp && mv temp "$file"
-          done
-
-          # Check if there are any changes to commit
-          if [ -n "$(git status --porcelain)" ]; then
+            LANG="${{ matrix.lang }}"
+            # Find all new or modified files in the localization folder
+            git diff --name-only HEAD^ HEAD -- "i18n/${LANG}/docusaurus-plugin-content-docs-current/**/*.md" | while IFS= read -r file; do
+            # Check if the file exists
+            if [ -f "$file" ]; then
+                # Prepend the language code at the beginning of each file
+                temp_file=$(mktemp) # Create a unique temporary file
+                echo "${LANG}" | cat - "$file" > "$temp_file" && mv "$temp_file" "$file"
+            else
+                echo "Warning: File '$file' does not exist."
+            fi
+            done
+        
+            # Check if there are any changes to commit
+            if [ -n "$(git status --porcelain)" ]; then
             git add i18n/
             git commit -m "Inserted language code for locale-${{ matrix.lang }}"
             git push origin $BRANCH_NAME
-          else
+            else
             echo "No new or modified files to commit after inserting language code."
-          fi
+            fi
 
       - name: Create Pull Request for translation
         if: ${{ steps.create-branch.outputs.branch-name }}
