@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Create translation branch for each language
         id: create-branch
@@ -28,6 +30,9 @@ jobs:
           UNIQUE_ID=$(date +%s) # Generate a unique ID using the current timestamp
           BRANCH_NAME="translation-${LANG}-${UNIQUE_ID}"
           
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
           # Create a new branch for the translation
           git checkout -b $BRANCH_NAME
 
