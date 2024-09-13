@@ -1,0 +1,78 @@
+name: Automatic Translation
+
+on:
+  push:
+    paths:
+      - 'docs/**'
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  localize:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: write
+    strategy:
+      matrix:
+       lang: ["fr", "ro"] # List of languages for localization
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create translation branch for each language
+        id: create-branch
+        run: |
+          LANG="${{ matrix.lang }}"
+          UNIQUE_ID=$(date +%s) # Generate a unique ID using the current timestamp
+          BRANCH_NAME="translation-${LANG}-${UNIQUE_ID}"
+          
+          # Create a new branch for the translation
+          git checkout -b $BRANCH_NAME
+
+          # Find new or modified files in the docs folder
+          new_files=$(git diff --name-only HEAD^ HEAD -- 'docs/*')
+
+          # Copy new or modified files to the localization folder for the specific language
+          for file in $new_files; do
+            relative_path=${file#docs/}
+            cp "$file" "i18n/${LANG}/docusaurus-plugin-content-docs-current/$relative_path"
+          done
+
+          # Check if there are any changes to commit
+          if [ -n "$(git status --porcelain)" ]; then
+            git add i18n/
+            git commit -m "Add new or modified files for translation to ${LANG} branch"
+            git push origin $BRANCH_NAME
+          else
+            echo "No new or modified files to commit."
+          fi
+
+      - name: Insert language code at the beginning of new files
+        run: |
+          LANG="${{ matrix.lang }}"
+          # Find all new or modified files in the localization folder
+          for file in $(git diff --name-only HEAD^ HEAD -- "i18n/${LANG}/docusaurus-plugin-content-docs-current/**/*.md"); do
+            # Prepend the language code at the beginning of each file
+            echo "${LANG}" | cat - "$file" > temp && mv temp "$file"
+          done
+
+          # Check if there are any changes to commit
+          if [ -n "$(git status --porcelain)" ]; then
+            git add i18n/
+            git commit -m "Inserted language code for locale-${{ matrix.lang }}"
+            git push origin $BRANCH_NAME
+          else
+            echo "No new or modified files to commit after inserting language code."
+          fi
+
+      - name: Create Pull Request for translation
+        if: ${{ steps.create-branch.outputs.branch-name }}
+        uses: peter-evans/create-pull-request@v5
+        with:
+          branch: $BRANCH_NAME # Source branch for the PR
+          base: locale-${{ matrix.lang }} # Target branch for the PR
+          title: "Automated Translation Update for ${{ matrix.lang }} - ${UNIQUE_ID}"
+          body: "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed."
+          #team-reviewers: "locale-${{ matrix.lang }}" # Request review from the language-specific team

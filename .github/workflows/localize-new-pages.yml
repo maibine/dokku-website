@@ -1,11 +1,11 @@
 name: Localize New Pages
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'docs/**' # Trigger the workflow when changes are made to files in the /docs folder
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'docs/**' # Trigger the workflow when changes are made to files in the /docs folder
   workflow_dispatch:
 jobs:
   localize:
