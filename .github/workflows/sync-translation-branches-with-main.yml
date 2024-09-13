@@ -1,10 +1,10 @@
 name: Sync Translations with main
 
 on:
-  push:
-    branches:
-      - main  # Trigger the workflow on every push to the main branch
-
+  # push:
+  #   branches:
+  #     - main  # Trigger the workflow on every push to the main branch
+  workflow_dispatch:
 jobs:
   sync-translations:
     runs-on: ubuntu-latest
