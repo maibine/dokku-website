@@ -10,6 +10,8 @@ on:
 jobs:
   localize:
     runs-on: ubuntu-latest
+    outputs:
+      branch-name: ${{ steps.create-branch.outputs.branch-name }}
     permissions:
       issues: write
       contents: write
@@ -29,6 +31,7 @@ jobs:
             LANG="${{ matrix.lang }}"
             UNIQUE_ID=$(date +%s) # Generate a unique ID using the current timestamp
             BRANCH_NAME="translation-${LANG}-${UNIQUE_ID}"
+            echo "branch-name=${BRANCH_NAME}" >> $GITHUB_OUTPUT # Set the output
 
             git config --global user.name 'github-actions[bot]'
             git config --global user.email 'github-actions[bot]@users.noreply.github.com'
@@ -96,7 +99,7 @@ jobs:
             fi
 
       - name: Create Pull Request for translation
-        if: ${{ steps.create-branch.outputs.branch-name }}
+        if: success() && steps.create-branch.outputs.branch-name
         uses: peter-evans/create-pull-request@v5
         with:
           branch: $BRANCH_NAME # Source branch for the PR
