@@ -26,33 +26,50 @@ jobs:
       - name: Create translation branch for each language
         id: create-branch
         run: |
-          LANG="${{ matrix.lang }}"
-          UNIQUE_ID=$(date +%s) # Generate a unique ID using the current timestamp
-          BRANCH_NAME="translation-${LANG}-${UNIQUE_ID}"
-          
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+            LANG="${{ matrix.lang }}"
+            UNIQUE_ID=$(date +%s) # Generate a unique ID using the current timestamp
+            BRANCH_NAME="translation-${LANG}-${UNIQUE_ID}"
 
-          # Create a new branch for the translation
-          git checkout -b $BRANCH_NAME
+            git config --global user.name 'github-actions[bot]'
+            git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-          # Find new or modified files in the docs folder
-          new_files=$(git diff --name-only HEAD^ HEAD -- 'docs/*')
+            # Create a new branch for the translation
+            git checkout -b "$BRANCH_NAME"
 
-          # Copy new or modified files to the localization folder for the specific language
-          for file in $new_files; do
+            # Find new or modified files in the docs folder
+            new_files=$(git diff --name-only HEAD^ HEAD -- 'docs/*')
+
+            # Check if there are new or modified files
+            if [ -z "$new_files" ]; then
+            echo "No new or modified files found."
+            exit 0 # Exit gracefully
+            fi
+
+            # Copy new or modified files to the localization folder for the specific language
+            while IFS= read -r file; do
             relative_path=${file#docs/}
-            cp "$file" "i18n/${LANG}/docusaurus-plugin-content-docs-current/$relative_path"
-          done
+            destination_dir="i18n/${LANG}/docusaurus-plugin-content-docs-current/$(dirname "$relative_path")"
 
-          # Check if there are any changes to commit
-          if [ -n "$(git status --porcelain)" ]; then
+            # Create the destination directory if it doesn't exist
+            mkdir -p "$destination_dir"
+
+            # Copy the file to the localization folder
+            if [ -f "$file" ]; then # Check if the file exists
+                cp "$file" "$destination_dir/"
+            else
+                echo "Warning: File '$file' does not exist."
+            fi
+            done <<< "$new_files"
+
+            # Check if there are any changes to commit
+            if [ -n "$(git status --porcelain)" ]; then
             git add i18n/
             git commit -m "Add new or modified files for translation to ${LANG} branch"
-            git push origin $BRANCH_NAME
-          else
+            git push origin "$BRANCH_NAME"
+            else
             echo "No new or modified files to commit."
-          fi
+            fi
+
 
       - name: Insert language code at the beginning of new files
         run: |
