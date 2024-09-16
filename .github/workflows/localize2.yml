@@ -40,8 +40,8 @@ jobs:
             # Create or update the locale-[lang] branch from main
             git checkout -B "locale-${LANG}" main
 
-            # Find new or modified files in the docs folder
-            new_files=$(git diff --name-only main -- 'docs/*')
+            # Find new files in the docs folder added in the last commit
+            new_files=$(git log -1 --diff-filter=A --name-only --pretty="" origin/main -- 'docs/*')
 
             # Check if there are new or modified files
             if [ -z "$new_files" ]; then
