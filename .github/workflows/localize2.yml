@@ -175,4 +175,6 @@ jobs:
             title: "Automated Translation Update for ${{ matrix.lang }} - Based on commit: '${{ steps.get-latest-commit.outputs.latest-commit-message }}'"
             body: "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed."
             #team-reviewers: "locale-${{ matrix.lang }}"
+            delete-branch: false
+            branch-suffix: timestamp
           
