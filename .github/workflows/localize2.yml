@@ -165,7 +165,12 @@ jobs:
         run: |
             LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B main)
             echo "latest-commit-message=${LATEST_COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
-          
+      
+      - name: Create Pull Request
+        if: steps.create-branch.outputs.branch-name != '' # Only create a PR if a branch was created
+        run: |
+              BRANCH_NAME="${{ steps.create-branch.outputs.branch-name }}"
+              gh pr create --title "Automated Translation Update for ${{ matrix.lang }}" --body "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed." --head $BRANCH_NAME --base "locale-${{ matrix.lang }}"
     #   - name: Create Pull Request for translation
     #     uses: peter-evans/create-pull-request@v7
     #     if: steps.create-branch.outputs.branch-name != '' # Only create a PR if a branch was created
