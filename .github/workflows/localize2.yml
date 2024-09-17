@@ -168,6 +168,8 @@ jobs:
       
       - name: Create Pull Request
         if: steps.create-branch.outputs.branch-name != '' # Only create a PR if a branch was created
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
               BRANCH_NAME="${{ steps.create-branch.outputs.branch-name }}"
               gh pr create --title "Automated Translation Update for ${{ matrix.lang }}" --body "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed." --head $BRANCH_NAME --base "locale-${{ matrix.lang }}"
