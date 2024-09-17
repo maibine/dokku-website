@@ -122,9 +122,23 @@ jobs:
                     echo "Changes detected. Committing changes..."
                     git add i18n/
                     git commit -m "Inserted language code for locale-${LANG}"
+                    
+                    # Debug message before push
+                    echo "Pushing changes to remote branch: $BRANCH_NAME"
                     git push --set-upstream origin "$BRANCH_NAME"
-                    echo "Changes committed and pushed to branch: $BRANCH_NAME"
+                    
+                    # Debug message after push
+                    if [ $? -eq 0 ]; then
+                        echo "Push to remote branch '$BRANCH_NAME' was successful."
+                        # Print the log of the last commit on the pushed branch
+                        echo "Last commit on branch '$BRANCH_NAME':"
+                        git log -1 --oneline
+                    else
+                        echo "Push to remote branch '$BRANCH_NAME' failed."
+                        exit 1 # Exit with an error
+                    fi
 
+                    echo "Changes committed and pushed to branch: $BRANCH_NAME"
                     # Set outputs
                     echo "branch-name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
                     echo "unique-id=${UNIQUE_ID}" >> $GITHUB_OUTPUT
