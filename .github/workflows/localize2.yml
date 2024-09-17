@@ -45,25 +45,28 @@ jobs:
 
             # Check if there are new or modified files
             if [ -z "$new_files" ]; then
-            echo "No new or modified files found."
-            exit 0 # Exit gracefully
+                echo "No new or modified files found."
+                exit 0 # Exit gracefully
             fi
 
             # Copy new or modified files to the localization folder for the specific language
             while IFS= read -r file; do
-            relative_path=${file#docs/}
-            destination_dir="i18n/${LANG}/docusaurus-plugin-content-docs-current/$(dirname "$relative_path")"
+                relative_path=${file#docs/}
+                destination_dir="i18n/${LANG}/docusaurus-plugin-content-docs-current/$(dirname "$relative_path")"
 
-            # Create the destination directory if it doesn't exist
-            mkdir -p "$destination_dir"
+                # Create the destination directory if it doesn't exist
+                mkdir -p "$destination_dir"
 
-            # Copy the file to the localization folder
-            if [ -f "$file" ]; then
-                cp "$file" "$destination_dir/"
-            else
-                echo "Warning: File '$file' does not exist."
-            fi
+                # Copy the file to the localization folder
+                if [ -f "$file" ]; then
+                    cp "$file" "$destination_dir/"
+                else
+                    echo "Warning: File '$file' does not exist."
+                fi
             done <<< "$new_files"
+            
+            # Pull the latest changes from the remote locale-[lang] branch to prevent non-fast-forward error
+            git pull origin "locale-${LANG}" --rebase
 
             # Commit new or modified original files to locale-[lang]
             if [ -n "$(git status --porcelain)" ]; then
