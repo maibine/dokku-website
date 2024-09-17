@@ -166,15 +166,15 @@ jobs:
             LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B main)
             echo "latest-commit-message=${LATEST_COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
           
-      - name: Create Pull Request for translation
-        uses: peter-evans/create-pull-request@v7
-        if: steps.create-branch.outputs.branch-name != '' # Only create a PR if a branch was created
-        with:
-            branch: ${{ steps.create-branch.outputs.branch-name }}
-            base: locale-${{ matrix.lang }}
-            title: "Automated Translation Update for ${{ matrix.lang }} - Based on commit: '${{ steps.get-latest-commit.outputs.latest-commit-message }}'"
-            body: "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed."
-            #team-reviewers: "locale-${{ matrix.lang }}"
-            delete-branch: false
-            branch-suffix: timestamp
+    #   - name: Create Pull Request for translation
+    #     uses: peter-evans/create-pull-request@v7
+    #     if: steps.create-branch.outputs.branch-name != '' # Only create a PR if a branch was created
+    #     with:
+    #         branch: ${{ steps.create-branch.outputs.branch-name }}
+    #         base: locale-${{ matrix.lang }}
+    #         title: "Automated Translation Update for ${{ matrix.lang }} - Based on commit: '${{ steps.get-latest-commit.outputs.latest-commit-message }}'"
+    #         body: "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed."
+    #         #team-reviewers: "locale-${{ matrix.lang }}"
+    #         delete-branch: false
+    #         branch-suffix: timestamp
           
