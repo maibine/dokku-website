@@ -15,6 +15,7 @@ jobs:
     permissions:
       issues: write
       contents: write
+      pull-requests: write  # Explicitly add permissions for creating pull requests
     strategy:
       matrix:
        lang: ["fr", "ro"] # List of languages for localization
