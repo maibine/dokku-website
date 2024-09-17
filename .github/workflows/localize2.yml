@@ -85,6 +85,8 @@ jobs:
                 UNIQUE_ID=$(date +%s) # Generate a unique ID using the current timestamp
                 BRANCH_NAME="translation-${LANG}-${UNIQUE_ID}"
 
+                echo "Creating new branch for translation: $BRANCH_NAME"
+
                 # Create a new branch for the translation based on locale-[lang]
                 git checkout -b "$BRANCH_NAME"
 
@@ -92,36 +94,43 @@ jobs:
                 new_files=$(git log -1 --diff-filter=A --name-only --pretty="" origin/main -- 'docs/*')
 
                 if [ -z "$new_files" ]; then
-                echo "No new added files to process."
-                exit 0 # Exit gracefully
+                    echo "No new added files to process."
+                    exit 0 # Exit gracefully
                 fi
 
                 # Loop over the new files and prepend the language code
                 while IFS= read -r file; do
-                relative_path=${file#docs/}
-                localization_file="i18n/${LANG}/docusaurus-plugin-content-docs-current/$relative_path"
+                    relative_path=${file#docs/}
+                    localization_file="i18n/${LANG}/docusaurus-plugin-content-docs-current/$relative_path"
 
-                # Prepend the language code at the beginning of each file
-                if [ -f "$localization_file" ]; then
-                    temp_file=$(mktemp) # Create a unique temporary file
-                    echo "${LANG}" | cat - "$localization_file" > "$temp_file" && mv "$temp_file" "$localization_file"
-                else
-                    echo "Warning: Localization file '$localization_file' does not exist."
-                fi
+                    # Prepend the language code at the beginning of each file
+                    if [ -f "$localization_file" ]; then
+                        temp_file=$(mktemp) # Create a unique temporary file
+                        echo "${LANG}" | cat - "$localization_file" > "$temp_file" && mv "$temp_file" "$localization_file"
+                        echo "Prepended language code to file: $localization_file"
+                    else
+                        echo "Warning: Localization file '$localization_file' does not exist."
+                    fi
                 done <<< "$new_files"
+
+                # Display the status before committing changes for debugging
+                echo "Status before committing changes:"
+                git status
 
                 # Commit the changes
                 if [ -n "$(git status --porcelain)" ]; then
-                git add i18n/
-                git commit -m "Inserted language code for locale-${LANG}"
-                git push --set-upstream origin "$BRANCH_NAME"
+                    echo "Changes detected. Committing changes..."
+                    git add i18n/
+                    git commit -m "Inserted language code for locale-${LANG}"
+                    git push --set-upstream origin "$BRANCH_NAME"
+                    echo "Changes committed and pushed to branch: $BRANCH_NAME"
 
-                # Set outputs
-                echo "branch-name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
-                echo "unique-id=${UNIQUE_ID}" >> $GITHUB_OUTPUT
+                    # Set outputs
+                    echo "branch-name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+                    echo "unique-id=${UNIQUE_ID}" >> $GITHUB_OUTPUT
                 else
-                echo "No new or modified files to commit after inserting language code."
-                exit 0 # Exit gracefully
+                    echo "No new or modified files to commit after inserting language code."
+                    exit 0 # Exit gracefully
                 fi
 
       - name: Get the latest commit message from the main branch
