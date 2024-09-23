@@ -53,7 +53,7 @@ jobs:
             # Copy new or modified files to the localization folder for the specific language
             while IFS= read -r file; do
                 relative_path=${file#docs/}
-                destination_dir="i18n/${LANG}/docusaurus-plugin-content-docs-current/$(dirname "$relative_path")"
+                destination_dir="i18n/${LANG}/docusaurus-plugin-content-docs/current/$(dirname "$relative_path")"
 
                 # Create the destination directory if it doesn't exist
                 mkdir -p "$destination_dir"
@@ -115,7 +115,7 @@ jobs:
                 # Loop over the new files and prepend the language code
                 while IFS= read -r file; do
                     relative_path=${file#docs/}
-                    localization_file="i18n/${LANG}/docusaurus-plugin-content-docs-current/$relative_path"
+                    localization_file="i18n/${LANG}/docusaurus-plugin-content-docs/current/$relative_path"
 
                     # Prepend the language code at the beginning of each file
                     if [ -f "$localization_file" ]; then
