@@ -169,7 +169,7 @@ jobs:
       - name: Get the latest commit message from the main branch
         id: get-latest-commit
         run: |
-            LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B main)
+            LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B main | tr '\n' ' ')
             echo "latest-commit-message=${LATEST_COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
       
       - name: Create Pull Request
