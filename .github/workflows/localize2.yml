@@ -69,8 +69,8 @@ jobs:
                 git rebase main
             fi
             else
-            # If the branch doesn't exist, create it based on main
-            git checkout -B "locale-${LANG}" main
+                # If the branch doesn't exist, create it based on main
+                git checkout -B "locale-${LANG}" main
             fi
 
             # Check if files exist before switching branches
@@ -104,7 +104,10 @@ jobs:
                     echo "Warning: File '$file' does not exist."
                 fi
             done <<< "$new_files"
-            
+    
+            # Pull the latest changes from the remote locale-[lang] branch to ensure a non-fast-forward push doesn't happen
+            git pull --rebase origin "locale-${LANG}"
+
             # Commit new or modified original files to locale-[lang]
             if [ -n "$(git status --porcelain)" ]; then
             git add i18n/
