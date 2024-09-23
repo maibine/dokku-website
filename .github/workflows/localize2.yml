@@ -38,8 +38,16 @@ jobs:
             git checkout main
             git pull origin main
 
-            # Create or update the locale-[lang] branch from main
-            git checkout -B "locale-${LANG}" main
+            # Check if the locale-[lang] branch exists on the remote
+            if git ls-remote --exit-code --heads origin "locale-${LANG}"; then
+                # If the branch exists, check it out and rebase
+                git checkout "locale-${LANG}"
+                git pull origin "locale-${LANG}" --rebase
+            else
+                # If the branch doesn't exist, create it based on main
+                git checkout -B "locale-${LANG}" main
+            fi
+
 
             # Find new files in the docs folder added in the last commit
             new_files=$(git log -1 --diff-filter=A --name-only --pretty="" origin/main -- 'docs/*')
@@ -66,9 +74,6 @@ jobs:
                 fi
             done <<< "$new_files"
             
-            # Pull the latest changes from the remote locale-[lang] branch to prevent non-fast-forward error
-            git pull origin "locale-${LANG}" --rebase
-
             # Commit new or modified original files to locale-[lang]
             if [ -n "$(git status --porcelain)" ]; then
             git add i18n/
