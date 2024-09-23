@@ -38,19 +38,50 @@ jobs:
             git checkout main
             git pull origin main
 
+            # Find new files in the docs folder added in the last commit
+            new_files=$(git diff --name-status origin/main~1 origin/main | grep '^A' | cut -f2-)
+
+            # Debugging: Print detected new files
+            echo "New files detected: $new_files"
+
+            # Check if files exist before switching branches
+            echo "Checking if new files exist before branch checkout..."
+            while IFS= read -r file; do
+                if [ -f "$file" ]; then
+                    echo "File '$file' exists."
+                else
+                    echo "Warning: File '$file' does not exist."
+                fi
+            done <<< "$new_files"
+
             # Check if the locale-[lang] branch exists on the remote
             if git ls-remote --exit-code --heads origin "locale-${LANG}"; then
-                # If the branch exists, check it out and rebase
-                git checkout "locale-${LANG}"
-                git pull origin "locale-${LANG}" --rebase
+            # If the branch exists, check it out
+            git checkout "locale-${LANG}"
+
+            # Rebase locale-[lang] branch on top of main to ensure it includes the latest docs changes
+            git rebase main
+
+            if [ $? -ne 0 ]; then
+                echo "Rebase failed. Attempting to resolve conflicts automatically."
+                git rebase --abort
+                git reset --hard origin/"locale-${LANG}"
+                git rebase main
+            fi
             else
                 # If the branch doesn't exist, create it based on main
                 git checkout -B "locale-${LANG}" main
             fi
 
-
-            # Find new files in the docs folder added in the last commit
-            new_files=$(git diff --name-status HEAD~1 HEAD | grep '^A' | awk '{print $2}')
+            # Check if files exist before switching branches
+            echo "Checking if new files exist AFTER branch checkout..."
+            while IFS= read -r file; do
+                if [ -f "$file" ]; then
+                    echo "File '$file' exists."
+                else
+                    echo "Warning: File '$file' does not exist."
+                fi
+            done <<< "$new_files"
 
             # Check if there are new or modified files
             if [ -z "$new_files" ]; then
@@ -73,7 +104,10 @@ jobs:
                     echo "Warning: File '$file' does not exist."
                 fi
             done <<< "$new_files"
-            
+    
+            # Pull the latest changes from the remote locale-[lang] branch to ensure a non-fast-forward push doesn't happen
+            git pull --rebase origin "locale-${LANG}"
+
             # Commit new or modified original files to locale-[lang]
             if [ -n "$(git status --porcelain)" ]; then
             git add i18n/
@@ -108,7 +142,7 @@ jobs:
                 git log origin/"locale-${LANG}" -1 --oneline
                 
                 # Process the new files directly instead of using git diff
-                new_files=$(git diff --name-status HEAD~1 HEAD | grep '^A' | awk '{print $2}')
+                new_files=$(git diff --name-status origin/main~1 origin/main | grep '^A' | cut -f2-)
 
                 if [ -z "$new_files" ]; then
                     echo "No new added files to process."
@@ -169,7 +203,8 @@ jobs:
       - name: Get the latest commit message from the main branch
         id: get-latest-commit
         run: |
-            LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B main)
+            git log -1 --pretty=%B main | tr '\n' ' '
+            LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B main | tr '\n' ' ')
             echo "latest-commit-message=${LATEST_COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
       
       - name: Create Pull Request
@@ -177,8 +212,15 @@ jobs:
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+              echo "${latest-commit-message}"
+              echo "${{ steps.get-latest-commit.outputs.latest-commit-message }}"
               BRANCH_NAME="${{ steps.create-branch.outputs.branch-name }}"
-              gh pr create --title "Automated Translation Update for ${{ matrix.lang }}" --body "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed." --head $BRANCH_NAME --base "locale-${{ matrix.lang }}"
+              gh pr create \
+                --title "${{ steps.get-latest-commit.outputs.latest-commit-message }}"\
+                --body "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed." \
+                --head $BRANCH_NAME \
+                --base "locale-${{ matrix.lang }}"\
+                --label "${{ matrix.lang }},auto"
     #   - name: Create Pull Request for translation
     #     uses: peter-evans/create-pull-request@v7
     #     if: steps.create-branch.outputs.branch-name != '' # Only create a PR if a branch was created
