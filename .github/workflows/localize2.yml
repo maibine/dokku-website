@@ -38,6 +38,22 @@ jobs:
             git checkout main
             git pull origin main
 
+            # Find new files in the docs folder added in the last commit
+            new_files=$(git diff --name-status origin/main~1 origin/main | grep '^A' | cut -f2-)
+
+            # Debugging: Print detected new files
+            echo "New files detected: $new_files"
+
+            # Check if files exist before switching branches
+            echo "Checking if new files exist before branch checkout..."
+            while IFS= read -r file; do
+                if [ -f "$file" ]; then
+                    echo "File '$file' exists."
+                else
+                    echo "Warning: File '$file' does not exist."
+                fi
+            done <<< "$new_files"
+
             # Check if the locale-[lang] branch exists on the remote
             if git ls-remote --exit-code --heads origin "locale-${LANG}"; then
                 # If the branch exists, check it out and rebase
@@ -48,9 +64,15 @@ jobs:
                 git checkout -B "locale-${LANG}" main
             fi
 
-
-            # Find new files in the docs folder added in the last commit
-            new_files=$(git diff --name-status origin/main~1 origin/main | grep '^A' | cut -f2-)
+            # Check if files exist before switching branches
+            echo "Checking if new files exist AFTER branch checkout..."
+            while IFS= read -r file; do
+                if [ -f "$file" ]; then
+                    echo "File '$file' exists."
+                else
+                    echo "Warning: File '$file' does not exist."
+                fi
+            done <<< "$new_files"
 
             # Check if there are new or modified files
             if [ -z "$new_files" ]; then
