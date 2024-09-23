@@ -50,7 +50,7 @@ jobs:
 
 
             # Find new files in the docs folder added in the last commit
-            new_files=$(git diff --name-status HEAD~1 HEAD | grep '^A' | awk '{print $2}')
+            new_files=$(git diff --name-status HEAD~1 HEAD | grep '^A' | cut -f2-)
 
             # Check if there are new or modified files
             if [ -z "$new_files" ]; then
@@ -108,7 +108,7 @@ jobs:
                 git log origin/"locale-${LANG}" -1 --oneline
                 
                 # Process the new files directly instead of using git diff
-                new_files=$(git diff --name-status HEAD~1 HEAD | grep '^A' | awk '{print $2}')
+                new_files=$(git diff --name-status HEAD~1 HEAD | grep '^A' | cut -f2-)
 
                 if [ -z "$new_files" ]; then
                     echo "No new added files to process."
