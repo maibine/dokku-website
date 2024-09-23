@@ -177,8 +177,14 @@ jobs:
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+              echo "${latest-commit-message}"
+              echo "${{ steps.get-latest-commit.outputs.latest-commit-message }}"
               BRANCH_NAME="${{ steps.create-branch.outputs.branch-name }}"
-              gh pr create --title "Automated Translation Update for ${{ matrix.lang }}" --body "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed." --head $BRANCH_NAME --base "locale-${{ matrix.lang }}"
+              gh pr create \
+                --title "Automated Translation Update for ${{ matrix.lang }}"\
+                --body "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed." \
+                --head $BRANCH_NAME \
+                --base "locale-${{ matrix.lang }}"
     #   - name: Create Pull Request for translation
     #     uses: peter-evans/create-pull-request@v7
     #     if: steps.create-branch.outputs.branch-name != '' # Only create a PR if a branch was created
