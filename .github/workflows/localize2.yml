@@ -169,6 +169,7 @@ jobs:
       - name: Get the latest commit message from the main branch
         id: get-latest-commit
         run: |
+            git log -1 --pretty=%B main | tr '\n' ' '
             LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B main | tr '\n' ' ')
             echo "latest-commit-message=${LATEST_COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
       
@@ -181,10 +182,11 @@ jobs:
               echo "${{ steps.get-latest-commit.outputs.latest-commit-message }}"
               BRANCH_NAME="${{ steps.create-branch.outputs.branch-name }}"
               gh pr create \
-                --title "Automated Translation Update for ${{ matrix.lang }}"\
+                --title "${{ steps.get-latest-commit.outputs.latest-commit-message }}"\
                 --body "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed." \
                 --head $BRANCH_NAME \
-                --base "locale-${{ matrix.lang }}"
+                --base "locale-${{ matrix.lang }}"\
+                --lable "${{ matrix.lang }},auto"
     #   - name: Create Pull Request for translation
     #     uses: peter-evans/create-pull-request@v7
     #     if: steps.create-branch.outputs.branch-name != '' # Only create a PR if a branch was created
