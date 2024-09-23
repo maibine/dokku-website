@@ -16,4 +16,4 @@ Documentele sunt **grupuri de pagini** conectate prin:
 # Bună
 ```
 
-# Creaza un document nou
+# Creaza un document nou nout
