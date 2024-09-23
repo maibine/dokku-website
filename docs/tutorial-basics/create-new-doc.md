@@ -15,3 +15,5 @@ Documentele sunt **grupuri de pagini** conectate prin:
 ```md title="docs/hello.md"
 # Bună
 ```
+
+# Creaza un document nou
