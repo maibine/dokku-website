@@ -6,11 +6,6 @@ on:
       - main # Only trigger when changes are pushed to the main branch
     paths:
       - 'docs/**' # Only trigger if changes are made in the docs folder
-  pull_request:
-    branches:
-      - main # Only trigger if the PR targets the main branch
-    paths:
-      - 'docs/**' # Only trigger if the PR affects files in the docs folder
   workflow_dispatch:
 jobs:
   localize:
