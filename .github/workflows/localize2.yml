@@ -60,7 +60,8 @@ jobs:
                 git checkout "locale-${LANG}"
 
                 # Rebase locale-[lang] branch on top of main to ensure it includes the latest docs changes
-                git rebase main
+                git rebase origin/main
+                git push --force-with-lease
 
                 # Handle potential rebase conflicts automatically
                 while [ $? -ne 0 ]; do
