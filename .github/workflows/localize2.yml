@@ -56,24 +56,30 @@ jobs:
 
             # Check if the locale-[lang] branch exists on the remote
             if git ls-remote --exit-code --heads origin "locale-${LANG}"; then
-            # If the branch exists, check it out
-            git checkout "locale-${LANG}"
+                # If the branch exists, check it out
+                git checkout "locale-${LANG}"
 
-            # Rebase locale-[lang] branch on top of main to ensure it includes the latest docs changes
-            git rebase main
-
-            if [ $? -ne 0 ]; then
-                echo "Rebase failed. Attempting to resolve conflicts automatically."
-                git rebase --abort
-                git reset --hard origin/"locale-${LANG}"
+                # Rebase locale-[lang] branch on top of main to ensure it includes the latest docs changes
                 git rebase main
-            fi
+
+                # Handle potential rebase conflicts automatically
+                while [ $? -ne 0 ]; do
+                    echo "Conflict detected. Attempting to resolve..."
+                    
+                    # Automatically skip commits that are already upstream or conflict
+                    git rebase --skip
+                    if [ $? -ne 0 ]; then
+                        echo "Rebase failed. Aborting rebase."
+                        git rebase --abort
+                        exit 1
+                    fi
+                done
             else
                 # If the branch doesn't exist, create it based on main
                 git checkout -B "locale-${LANG}" main
             fi
 
-            # Check if files exist before switching branches
+            # Check if files exist after switching branches
             echo "Checking if new files exist AFTER branch checkout..."
             while IFS= read -r file; do
                 if [ -f "$file" ]; then
