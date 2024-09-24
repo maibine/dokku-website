@@ -134,7 +134,7 @@ jobs:
 
                  echo "Switching to the locale branch for language: $LANG"
                 git checkout "locale-${LANG}"
-                git pull origin "locale-${LANG}"
+                git pull --rebase origin "locale-${LANG}"
 
                 # Create a new branch for the translation based on locale-[lang]
                 echo "Creating new branch for translation: $BRANCH_NAME"
