@@ -28,10 +28,10 @@ jobs:
       - name: Get the latest commit message from the main branch
         id: get-latest-commit
         run: |
-          # Fetch the latest commit message and sanitize it for branch naming
+          # Fetch the latest commit message
           LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B main | tr '\n' ' ' | tr -dc '[:alnum:]-_ ')
-          # Truncate the commit message to a maximum of 50 characters to avoid long branch names
-          SHORT_COMMIT_MESSAGE=$(echo "$LATEST_COMMIT_MESSAGE" | cut -c1-50)
+          # Replace spaces with hyphens and truncate to a reasonable length for branch name
+          SHORT_COMMIT_MESSAGE=$(echo "$LATEST_COMMIT_MESSAGE" | sed 's/ /-/g' | cut -c1-50)
           echo "latest-commit-message=${SHORT_COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
           echo "Sanitized and shortened commit message for branch: $SHORT_COMMIT_MESSAGE"
 
