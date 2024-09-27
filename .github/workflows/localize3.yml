@@ -1,0 +1,136 @@
+name: Automatic Translation 3
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  localize:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: write
+      pull-requests: write
+    strategy:
+      matrix:
+        lang: ["fr", "ro"] # List of languages for localization
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get the latest commit message from the main branch
+        id: get-latest-commit
+        run: |
+          # Fetch the latest commit message and sanitize it for branch naming
+          LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B main | tr '\n' ' ' | tr -dc '[:alnum:]-_ ')
+          # Truncate the commit message to a maximum of 50 characters to avoid long branch names
+          SHORT_COMMIT_MESSAGE=$(echo "$LATEST_COMMIT_MESSAGE" | cut -c1-50)
+          echo "latest-commit-message=${SHORT_COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
+          echo "Sanitized and shortened commit message for branch: $SHORT_COMMIT_MESSAGE"
+
+      - name: Create locale-[lang]-[shortened-commit-message] branch and copy new files
+        id: create-locale-branch
+        run: |
+          LANG="${{ matrix.lang }}"
+          SHORT_COMMIT_MESSAGE="${{ steps.get-latest-commit.outputs.latest-commit-message }}"
+
+          # Create a branch name with the language and shortened commit message
+          BRANCH_NAME="locale-${LANG}-${SHORT_COMMIT_MESSAGE}"
+
+          echo "Creating branch: $BRANCH_NAME"
+
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # Fetch the latest changes and checkout main branch
+          git fetch origin
+          git checkout main
+          git pull origin main
+
+          # Create and checkout the new locale-[lang]-[shortened-commit-message] branch
+          git checkout -b "$BRANCH_NAME"
+
+          # Find new files added in the last commit
+          new_files=$(git diff --name-status origin/main~1 origin/main | grep '^A' | cut -f2-)
+
+          if [ -z "$new_files" ]; then
+            echo "No new files to copy."
+            exit 0
+          fi
+
+          # Copy the new files to the corresponding i18n folder
+          while IFS= read -r file; do
+            relative_path=${file#docs/}
+            destination_dir="i18n/${LANG}/docusaurus-plugin-content-docs/current/$(dirname "$relative_path")"
+            mkdir -p "$destination_dir"
+            cp "$file" "$destination_dir/"
+          done <<< "$new_files"
+
+          # Commit the changes
+          git add i18n/
+          git commit -m "Add new files to locale-${LANG} branch based on commit: ${SHORT_COMMIT_MESSAGE}"
+
+          # Push the branch to the remote repository
+          git push origin "$BRANCH_NAME"
+
+          # Set outputs for later steps
+          echo "branch-name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Prepend language code and commit changes
+        run: |
+          LANG="${{ matrix.lang }}"
+          BRANCH_NAME="${{ steps.create-locale-branch.outputs.branch-name }}"
+
+          # Check out the branch created earlier
+          git checkout "$BRANCH_NAME"
+          git pull origin "$BRANCH_NAME"
+
+          # Find the copied files and prepend the language code
+          new_files=$(git diff --name-status origin/main~1 origin/main | grep '^A' | cut -f2-)
+
+          if [ -z "$new_files" ]; then
+            echo "No new files to process."
+            exit 0
+          fi
+
+          while IFS= read -r file; do
+            relative_path=${file#docs/}
+            localization_file="i18n/${LANG}/docusaurus-plugin-content-docs/current/$relative_path"
+
+            if [ -f "$localization_file" ]; then
+              temp_file=$(mktemp)
+              echo "${LANG}" | cat - "$localization_file" > "$temp_file" && mv "$temp_file" "$localization_file"
+              echo "Prepended language code to file: $localization_file"
+            else
+              echo "Warning: Localization file '$localization_file' does not exist."
+            fi
+          done <<< "$new_files"
+
+          # Commit the changes with the prepended language code
+          git add i18n/
+          git commit -m "Prepended language code to files for locale-${LANG} branch"
+
+          # Push the changes to the same branch
+          git push origin "$BRANCH_NAME"
+
+      - name: Create Pull Request
+        if: steps.create-locale-branch.outputs.branch-name != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="${{ steps.create-locale-branch.outputs.branch-name }}"
+          SHORT_COMMIT_MESSAGE="${{ steps.get-latest-commit.outputs.latest-commit-message }}"
+
+          gh pr create \
+            --title "${SHORT_COMMIT_MESSAGE}" \
+            --body "This PR contains automated modifications for the ${{ matrix.lang }} language and needs to be reviewed." \
+            --head "$BRANCH_NAME" \
+            --base "main" \
+            --label "${{ matrix.lang }},auto"

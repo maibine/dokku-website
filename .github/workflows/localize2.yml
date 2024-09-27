@@ -1,11 +1,11 @@
 name: Automatic Translation
 
 on:
-  push:
-    branches:
-      - main # Only trigger when changes are pushed to the main branch
-    paths:
-      - 'docs/**' # Only trigger if changes are made in the docs folder
+#   push:
+#     branches:
+#       - main # Only trigger when changes are pushed to the main branch
+#     paths:
+#       - 'docs/**' # Only trigger if changes are made in the docs folder
   workflow_dispatch:
 jobs:
   localize:
