@@ -41,6 +41,10 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+          # Ensure we are up to date with the latest changes from remote
+          git fetch origin
+          git pull origin main --rebase
+
           # Find new files added in the last commit
           new_files=$(git diff --name-status origin/main~1 origin/main | grep '^A' | cut -f2-)
 
