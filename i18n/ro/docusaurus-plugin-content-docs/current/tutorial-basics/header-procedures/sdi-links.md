@@ -1,3 +1,4 @@
+ro
 ---
 title: Sdi - Închiderea documentelor (Sdi - Chiusura documenti)
 sidebar_position: 4

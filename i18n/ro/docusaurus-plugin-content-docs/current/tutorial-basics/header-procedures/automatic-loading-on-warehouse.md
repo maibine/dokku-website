@@ -1,3 +1,4 @@
+ro
 ---
 title: Încărcare automată în depozit (Carico automatico in magazzino)
 sidebar_position: 3
