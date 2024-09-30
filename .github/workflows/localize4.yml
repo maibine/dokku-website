@@ -27,12 +27,19 @@ jobs:
       - name: Get the latest commit message and sanitize it for branch name
         id: get-latest-commit
         run: |
-          # Fetch the latest commit message
+          # Get and sanitize the latest commit message
           LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B main | tr '\n' ' ' | tr -dc '[:alnum:]-_ ')
+
           # Replace spaces with hyphens and truncate to a reasonable length for branch name
-          SHORT_COMMIT_MESSAGE=$(echo "$LATEST_COMMIT_MESSAGE" | sed 's/ /-/g' | cut -c1-50)
-          echo "latest-commit-message=${SHORT_COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
-          echo "Sanitized and shortened commit message for branch: $SHORT_COMMIT_MESSAGE"
+          SHORT_COMMIT_MESSAGE=$(echo "$LATEST_COMMIT_MESSAGE" | sed 's/ /-/g' | sed 's/--*/-/g' | sed 's/-$//g' | cut -c1-50)
+
+          # If the sanitized message is empty or consists only of special characters, provide a default value
+          if [[ -z "$SHORT_COMMIT_MESSAGE" ]]; then
+            SHORT_COMMIT_MESSAGE="default-message"
+          fi
+
+          echo "Sanitized commit message: $SHORT_COMMIT_MESSAGE"
+          echo "latest-commit-message=$SHORT_COMMIT_MESSAGE" >> $GITHUB_OUTPUT
 
       - name: Detect languages from i18n folder
         id: detect-languages
@@ -116,18 +123,25 @@ jobs:
 
           # Create a new branch for this language
           BRANCH_NAME="locale-${LANG}-${COMMIT_MESSAGE}"
+          echo "Branch name: $BRANCH_NAME"
+          echo "Commit message: $COMMIT_MESSAGE"
+
           git checkout -b "$BRANCH_NAME"
 
           # Ensure we're in the i18n folder for the language
-          for file in $(find "i18n/${LANG}/docusaurus-plugin-content-docs/current/" -type f); do
-            # Prepend the language code to the file content
-            echo "${LANG}" | cat - "$file" > temp && mv temp "$file"
+          find "i18n/${LANG}/docusaurus-plugin-content-docs/current/" -type f | while IFS= read -r file; do
+          # Prepend the language code to the file content
+          echo "${LANG}" | cat - "$file" > temp && mv temp "$file"
           done
 
           # Commit and push the changes to the new branch
           git add i18n/
           git commit -m "Prepended language code for locale-${LANG}"
           git push origin "$BRANCH_NAME"
+
+      - name: Debug commit message
+        run: |
+          echo "Commit message: $COMMIT_MESSAGE"
 
       - name: Create Pull Request
         env:
