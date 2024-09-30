@@ -37,11 +37,15 @@ jobs:
       - name: Detect languages from i18n folder
         id: detect-languages
         run: |
-         # Detect the languages by listing directories under i18n/ with names that are exactly 2 or 5 characters long
-          languages=$(find i18n -mindepth 1 -maxdepth 1 -type d | xargs -n 1 basename | grep -E '^.{2}$|^.{5}$' | tr '\n' ',')
-          echo "Detected languages: $languages"
-          echo "languages=$languages" >> $GITHUB_OUTPUT
-
+          # Detect the languages by listing directories under i18n/ with names that are exactly 2 or 5 characters long
+          languages=$(find i18n -mindepth 1 -maxdepth 1 -type d | xargs -n 1 basename | grep -E '^.{2}$|^.{5}$')
+          
+          # Format the languages as a JSON array
+          languages_json=$(echo "$languages" | awk '{printf "[\"%s\"", $1; for(i=2;i<=NF;i++) printf ",\"%s\"", $i; print "]"}')
+          
+          echo "Detected languages: $languages_json"
+          echo "languages=$languages_json" >> $GITHUB_OUTPUT
+        
       - name: Copy files to i18n folders
         run: |
           git config --global user.name 'github-actions[bot]'
@@ -88,6 +92,10 @@ jobs:
         lang: ${{ fromJson(needs.copy-original.outputs.languages) }} # Dynamically use detected languages
 
     steps:
+      - name: Debug languages output
+        run: |
+          echo "Languages output: ${{ needs.copy-original.outputs.languages }}"
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
