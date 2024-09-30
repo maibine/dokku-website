@@ -9,15 +9,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  localize:
+  # Step 1: Copy original files to main, detect languages, and process commit message
+  copy-original:
     runs-on: ubuntu-latest
     permissions:
-      issues: write
-      contents: write
-      pull-requests: write
-    strategy:
-      matrix:
-        lang: ["fr", "ro"] # List of languages for localization
+      contents: write  # Allows pushing commits to the repository
+    outputs:
+      languages: ${{ steps.detect-languages.outputs.languages }}
+      commit-message: ${{ steps.get-latest-commit.outputs.latest-commit-message }}
 
     steps:
       - name: Checkout repository
@@ -35,9 +34,16 @@ jobs:
           echo "latest-commit-message=${SHORT_COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
           echo "Sanitized and shortened commit message for branch: $SHORT_COMMIT_MESSAGE"
 
-      - name: Copy original file to main branch
+      - name: Detect languages from i18n folder
+        id: detect-languages
         run: |
-          LANG="${{ matrix.lang }}"
+         # Detect the languages by listing directories under i18n/ with names that are exactly 2 or 5 characters long
+          languages=$(find i18n -mindepth 1 -maxdepth 1 -type d | xargs -n 1 basename | grep -E '^.{2}$|^.{5}$' | tr '\n' ',')
+          echo "Detected languages: $languages"
+          echo "languages=$languages" >> $GITHUB_OUTPUT
+
+      - name: Copy files to i18n folders
+        run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
@@ -53,74 +59,79 @@ jobs:
             exit 0
           fi
 
-          # Copy the new files to the corresponding i18n folder without translation
-          while IFS= read -r file; do
-            relative_path=${file#docs/}
-            destination_dir="i18n/${LANG}/docusaurus-plugin-content-docs/current/$(dirname "$relative_path")"
-            mkdir -p "$destination_dir"
-            cp "$file" "$destination_dir/"
-          done <<< "$new_files"
+          # Copy the new files to the detected languages' i18n folders
+          for lang in $(echo "${{ steps.detect-languages.outputs.languages }}" | tr ',' ' '); do
+            while IFS= read -r file; do
+              relative_path=${file#docs/}
+              destination_dir="i18n/$lang/docusaurus-plugin-content-docs/current/$(dirname "$relative_path")"
+              mkdir -p "$destination_dir"
+              cp "$file" "$destination_dir/"
+            done <<< "$new_files"
+          done
 
           # Commit the changes to main branch
           git add i18n/
-          git commit -m "Add original files for locale-${LANG} to main branch"
+          git commit -m "${{ steps.get-latest-commit.outputs.latest-commit-message }} - Add original files for all locales to main branch"
           git push origin main
 
-      - name: Create new branch and prepend language code
-        id: create-translation-branch
+# Step 2: Prepend language code and create translation branches (matrix mode)
+  translate:
+    needs: copy-original
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write     # Allows creating new branches and pushing commits
+      pull-requests: write # Allows creating pull requests
+
+    strategy:
+      matrix:
+        lang: ${{ fromJson(needs.copy-original.outputs.languages) }} # Dynamically use detected languages
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create translation branch and prepend language code
         run: |
           LANG="${{ matrix.lang }}"
-          SHORT_COMMIT_MESSAGE="${{ steps.get-latest-commit.outputs.latest-commit-message }}"
+          COMMIT_MESSAGE="${{ needs.copy-original.outputs.commit-message }}"
 
-          # Ensure we're on the main branch before creating a new branch
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # Ensure we are on the latest main branch
+          git fetch origin
           git checkout main
           git pull origin main
-          
-          # Create a new branch based on main
-          BRANCH_NAME="locale-${LANG}-${SHORT_COMMIT_MESSAGE}"
+
+          # Create a new branch for this language
+          BRANCH_NAME="locale-${LANG}-${COMMIT_MESSAGE}"
           git checkout -b "$BRANCH_NAME"
 
-          # Find the copied files and prepend the language code
-          new_files=$(git diff --name-status origin/main~1 origin/main | grep '^A' | cut -f2-)
+          # Ensure we're in the i18n folder for the language
+          for file in $(find "i18n/${LANG}/docusaurus-plugin-content-docs/current/" -type f); do
+            # Prepend the language code to the file content
+            echo "${LANG}" | cat - "$file" > temp && mv temp "$file"
+          done
 
-          if [ -z "$new_files" ]; then
-            echo "No new files to process."
-            exit 0
-          fi
-
-          # Prepend the language code to the copied files
-          while IFS= read -r file; do
-            relative_path=${file#docs/}
-            localization_file="i18n/${LANG}/docusaurus-plugin-content-docs/current/$relative_path"
-
-            if [ -f "$localization_file" ]; then
-              temp_file=$(mktemp)
-              echo "${LANG}" | cat - "$localization_file" > "$temp_file" && mv "$temp_file" "$localization_file"
-              echo "Prepended language code to file: $localization_file"
-            else
-              echo "Warning: Localization file '$localization_file' does not exist."
-            fi
-          done <<< "$new_files"
-
-          # Commit the changes with the prepended language code
+          # Commit and push the changes to the new branch
           git add i18n/
-          git commit -m "Prepended language code for locale-${LANG} based on commit: ${SHORT_COMMIT_MESSAGE}"
+          git commit -m "Prepended language code for locale-${LANG}"
           git push origin "$BRANCH_NAME"
 
-          # Set outputs for later steps
-          echo "branch-name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
-
       - name: Create Pull Request
-        if: steps.create-translation-branch.outputs.branch-name != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH_NAME="${{ steps.create-translation-branch.outputs.branch-name }}"
-          SHORT_COMMIT_MESSAGE="${{ steps.get-latest-commit.outputs.latest-commit-message }}"
+          LANG="${{ matrix.lang }}"
+          BRANCH_NAME="locale-${LANG}-${COMMIT_MESSAGE}"
 
           gh pr create \
-            --title "Translation for ${LANG} - ${SHORT_COMMIT_MESSAGE}" \
-            --body "This PR contains automated modifications for the ${{ matrix.lang }} language, with the language code prepended." \
+            --title "Translation for ${LANG}" \
+            --body "This PR contains the translation modifications for the ${{ matrix.lang }} language." \
             --head "$BRANCH_NAME" \
             --base "main" \
             --label "${{ matrix.lang }},auto"
+
