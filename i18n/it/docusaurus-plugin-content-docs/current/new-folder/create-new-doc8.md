@@ -1,3 +1,4 @@
+it
 # Crează un document nou pe poziția 7
 
 Documentele sunt **grupuri de pagini** conectate prin:
