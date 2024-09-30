@@ -72,6 +72,10 @@ jobs:
           LANG="${{ matrix.lang }}"
           SHORT_COMMIT_MESSAGE="${{ steps.get-latest-commit.outputs.latest-commit-message }}"
 
+          # Ensure we're on the main branch before creating a new branch
+          git checkout main
+          git pull origin main
+          
           # Create a new branch based on main
           BRANCH_NAME="locale-${LANG}-${SHORT_COMMIT_MESSAGE}"
           git checkout -b "$BRANCH_NAME"
