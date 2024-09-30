@@ -1,3 +1,4 @@
+fr
 ---
 title: SDI - Fermeture des documents
 sidebar_position: 4

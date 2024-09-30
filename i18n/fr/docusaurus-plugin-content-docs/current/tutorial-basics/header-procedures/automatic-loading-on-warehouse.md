@@ -1,3 +1,4 @@
+fr
 ---
 title: Chargement automatique en entrepôt
 sidebar_position: 3

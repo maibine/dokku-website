@@ -1,3 +1,4 @@
+fr
 # Créez un nouveau document à la position 5
 
 Les documents sont des **groupes de pages** connectées par :
