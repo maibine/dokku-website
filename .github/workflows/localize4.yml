@@ -103,6 +103,18 @@ jobs:
         run: |
           echo "Languages output: ${{ needs.copy-original.outputs.languages }}"
 
+      - name: Set environment variables for branch and commit message
+        run: |
+          LANG="${{ matrix.lang }}"
+          COMMIT_MESSAGE="${{ needs.copy-original.outputs.commit-message }}"
+
+          # Set BRANCH_NAME by combining LANG and COMMIT_MESSAGE
+          BRANCH_NAME="locale-${LANG}-${COMMIT_MESSAGE}"
+
+          # Write BRANCH_NAME and COMMIT_MESSAGE to GITHUB_ENV for use in subsequent steps
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
+       
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -111,7 +123,9 @@ jobs:
       - name: Create translation branch and prepend language code
         run: |
           LANG="${{ matrix.lang }}"
-          COMMIT_MESSAGE="${{ needs.copy-original.outputs.commit-message }}"
+          # Use the environment variables set in the previous step
+          echo "Using branch name: $BRANCH_NAME"
+          echo "Using commit message: $COMMIT_MESSAGE"
 
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
@@ -122,10 +136,6 @@ jobs:
           git pull origin main
 
           # Create a new branch for this language
-          BRANCH_NAME="locale-${LANG}-${COMMIT_MESSAGE}"
-          echo "Branch name: $BRANCH_NAME"
-          echo "Commit message: $COMMIT_MESSAGE"
-
           git checkout -b "$BRANCH_NAME"
 
           # Ensure we're in the i18n folder for the language
@@ -148,7 +158,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           LANG="${{ matrix.lang }}"
-          BRANCH_NAME="locale-${LANG}-${COMMIT_MESSAGE}"
+          # Use the BRANCH_NAME and COMMIT_MESSAGE from GITHUB_ENV
+
+          echo "Commit message: $COMMIT_MESSAGE"
 
           gh pr create \
             --title "Translation for ${LANG}" \
