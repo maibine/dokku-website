@@ -60,46 +60,46 @@ jobs:
           new_files=$(git diff --name-status -z HEAD~1 HEAD | grep -z '^A' | cut -zf2-)
           echo "new-files=$new_files" >> $GITHUB_OUTPUT
 
-          - name: Copy files to i18n folders
-          run: |
-            git config --global user.name 'github-actions[bot]'
-            git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        
-            # Ensure we are up to date with the latest changes from remote
-            git fetch origin
-            git pull origin main --rebase
-        
-            # Find new files added in the last commit (use null-delimiter to handle spaces in filenames)
-            new_files=$(git diff --name-status -z origin/main~1 origin/main | grep -z '^A' | cut -zf2-)
-        
-            if [ -z "$new_files" ]; then
-              echo "No new files to copy."
-              exit 0
-            fi
-        
-            # Strip the JSON array format (remove brackets and quotes) to get the language list
-            for lang in $(echo "${{ steps.detect-languages.outputs.languages }}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/"//g' | tr ',' ' '); do
-              echo "Processing language: $lang"
-        
-              # Iterate over each file using null as a delimiter for safe filename handling
-              echo "$new_files" | tr '\0' '\n' | while IFS= read -r -d '' file; do
-                relative_path=${file#docs/}
-                destination_dir="i18n/$lang/docusaurus-plugin-content-docs/current/$(dirname "$relative_path")"
-                
-                # Create the destination directory if it doesn't exist
-                mkdir -p "$destination_dir"
-                
-                # Copy the file to the destination directory
-                cp "$file" "$destination_dir/"
-                
-                echo "Copied $file to $destination_dir"
-              done
+      - name: Copy files to i18n folders
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+      
+          # Ensure we are up to date with the latest changes from remote
+          git fetch origin
+          git pull origin main --rebase
+      
+          # Find new files added in the last commit (use null-delimiter to handle spaces in filenames)
+          new_files=$(git diff --name-status -z origin/main~1 origin/main | grep -z '^A' | cut -zf2-)
+      
+          if [ -z "$new_files" ]; then
+            echo "No new files to copy."
+            exit 0
+          fi
+      
+          # Strip the JSON array format (remove brackets and quotes) to get the language list
+          for lang in $(echo "${{ steps.detect-languages.outputs.languages }}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/"//g' | tr ',' ' '); do
+            echo "Processing language: $lang"
+      
+            # Iterate over each file using null as a delimiter for safe filename handling
+            echo "$new_files" | tr '\0' '\n' | while IFS= read -r -d '' file; do
+              relative_path=${file#docs/}
+              destination_dir="i18n/$lang/docusaurus-plugin-content-docs/current/$(dirname "$relative_path")"
+              
+              # Create the destination directory if it doesn't exist
+              mkdir -p "$destination_dir"
+              
+              # Copy the file to the destination directory
+              cp "$file" "$destination_dir/"
+              
+              echo "Copied $file to $destination_dir"
             done
-        
-            # Commit the changes to the main branch
-            git add i18n/
-            git commit -m "${{ steps.get-latest-commit.outputs.latest-commit-message }} - Add original files for all locales to main branch"
-            git push origin main
+          done
+      
+          # Commit the changes to the main branch
+          git add i18n/
+          git commit -m "${{ steps.get-latest-commit.outputs.latest-commit-message }} - Add original files for all locales to main branch"
+          git push origin main
         
 # Step 2: Prepend language code and create translation branches (matrix mode)
   translate:
