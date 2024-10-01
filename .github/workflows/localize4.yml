@@ -225,12 +225,22 @@ jobs:
           LANG="${{ matrix.lang }}"
           # Use the BRANCH_NAME and COMMIT_MESSAGE from GITHUB_ENV
 
+          # Write the body to a temporary file because of line ending not correctly handled
+          body = "This PR contains the translation modifications for the ${{ matrix.lang }} language.\nPlease delete the  ${BRANCH_NAME} after merge."
+          temp_file=$(mktemp)
+          echo -e "$body" > "$temp_file"
+
+          # Export the content of the temporary file
+          export msg=$(cat "$temp_file")
           echo "Commit message: $COMMIT_MESSAGE"
 
           gh pr create \
-            --title "Translation for ${LANG}" \
-            --body "This PR contains the translation modifications for the ${{ matrix.lang }} language." \
+            --title "${$COMMIT_MESSAGE} - auto translation" \
+            --body "${msg}" \
             --head "$BRANCH_NAME" \
             --base "main" \
             --label "${{ matrix.lang }},auto"
+
+          # Clean up the temporary file
+          rm "$temp_file"
 
