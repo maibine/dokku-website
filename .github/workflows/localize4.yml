@@ -57,11 +57,9 @@ jobs:
       - name: Detect newly added files in the latest commit
         id: detect-new-files
         run: |
-          # Detect new files added in the last commit (use null delimiter for safety)
-          git diff --name-status -z HEAD~1 HEAD | grep -z '^A' | cut -zf2- | while IFS= read -r -d '' file; do
-            echo "$file" >> new_files_list.txt
-          done
-
+          # Detect new files added in the latest commit and handle filenames with spaces
+          git diff --name-status HEAD~1 HEAD | awk '$1 == "A" { $1=""; print substr($0,2) }' > new_files_list.txt
+      
           # Convert the new files list to a space-separated string and store it as output
           if [ -s new_files_list.txt ]; then
             new_files=$(awk '{ printf "\"%s\" ", $0 }' < new_files_list.txt)
@@ -70,7 +68,6 @@ jobs:
             echo "No new files to process."
             exit 0
           fi
-
 
       - name: Copy files to i18n folders
         run: |
