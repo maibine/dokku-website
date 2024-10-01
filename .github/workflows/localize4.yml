@@ -165,25 +165,20 @@ jobs:
 
           # Use the new files output from the previous job
           for file in ${{ needs.copy-original.outputs.new-files }}; do
-            if [[ "$file" == *"/$LANG/"* ]]; then
-              echo "Processing file: $file"
+            # Replace /docs with the localized path i18n/${LANG}
+            localized_file="i18n/${LANG}/docusaurus-plugin-content-docs/current/${file#docs/}"
 
-              # Create the destination directory if necessary
-              destination_dir="i18n/${LANG}/docusaurus-plugin-content-docs/current/$(dirname "$file")"
-              mkdir -p "$destination_dir"
-              
-              # Copy the file and prepend the language code
-              cp "$file" "$destination_dir/"
-              target_file="$destination_dir/$(basename "$file")"
-              echo "$LANG" | cat - "$target_file" > temp && mv temp "$target_file"
+            echo "Processing localized file: $localized_file"
 
-              echo "Prepended language code to $target_file"
-            fi
+            # Prepend language code to the already copied localized file
+            echo "$LANG" | cat - "$localized_file" > temp && mv temp "$localized_file"
+
+            echo "Prepended language code to $localized_file"
           done
 
           # Commit and push the changes to the new branch
           git add i18n/
-          git commit -m "Prepended language code for locale-${LANG}"
+          git commit -m "Prepended language code for locale-${LANG} based on ${COMMIT_MESSAGE}"
           git push origin "$BRANCH_NAME"
 
       - name: Debug commit message
