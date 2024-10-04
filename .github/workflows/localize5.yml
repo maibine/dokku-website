@@ -209,7 +209,7 @@ jobs:
             -v ${{ github.workspace }}:/workspace \
             ghcr.io/fluentis-doc/translate-action:latest \
             new_files_list.txt \
-            /workspace \
+            ./ \
             ${{ matrix.lang }} \
             ${{ secrets.OPENAI_API_KEY }}
 
