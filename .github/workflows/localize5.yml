@@ -193,7 +193,7 @@ jobs:
 
       - name: Call Docker action to process translations #unauthorized if private
         #uses: docker://ghcr.io/fluentis-doc/translate-action:latest
-        uses: fluentis-doc/utils/TranslateActionSolution@master
+        uses: fluentis-doc/utils/TranslateActionSolution@main
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           lang: ${{ matrix.lang }}
