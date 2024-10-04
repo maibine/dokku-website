@@ -1,11 +1,11 @@
-name: Automatic Translation 4 - test - just adding the lang code
+name: Automatic Translation 5 call Action
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - 'docs/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
   workflow_dispatch:
 
 jobs:
@@ -98,6 +98,12 @@ jobs:
             echo "No new files to process."
             exit 0
           fi
+        # Upload the new files list as an artifact
+      - name: Upload new files list artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: new-files-list
+          path: new_files_list.txt
 
       - name: Copy files to i18n folders
         run: |
@@ -178,6 +184,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Download new files list artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: new-files-list
+          path: new_files_list.txt  # This will download the file as new_files_list.txt in the workspace
+
+      - name: Call Docker action to process translations
+        uses: docker://ghcr.io/fluentis-doc/translate-action:latest
+        with:
+          args:
+            - new_files_list.txt                               # Pass the downloaded file containing new files
+            - ${{ github.workspace }}                          # Pass the repository directory
+            - ${{ matrix.lang }}                               # Pass the current language
+            - ${{ secrets.OPENAI_API_KEY }}                    # Pass the OpenAI API key stored in secrets
+  
+
       - name: Create translation branch and prepend language code
         run: |
           LANG="${{ matrix.lang }}"
@@ -195,19 +217,6 @@ jobs:
 
           # Create a new branch for this language
           git checkout -b "$BRANCH_NAME"
-
-          # Use the new files output from the previous job
-          for file in ${{ needs.copy-original.outputs.new-files }}; do
-            # Replace /docs with the localized path i18n/${LANG}
-            localized_file="i18n/${LANG}/docusaurus-plugin-content-docs/current/${file#docs/}"
-
-            echo "Processing localized file: $localized_file"
-
-            # Prepend language code to the already copied localized file
-            echo "$LANG" | cat - "$localized_file" > temp && mv temp "$localized_file"
-
-            echo "Prepended language code to $localized_file"
-          done
 
           # Commit and push the changes to the new branch
           git add i18n/
