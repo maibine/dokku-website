@@ -192,7 +192,8 @@ jobs:
           path: new_files_list.txt  # This will download the file as new_files_list.txt in the workspace
 
       - name: Call Docker action to process translations #unauthorized if private
-        uses: docker://ghcr.io/fluentis-doc/translate-action:latest
+        #uses: docker://ghcr.io/fluentis-doc/translate-action:latest
+        uses: fluentis-doc/utils/TranslateActionSolution@master
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           lang: ${{ matrix.lang }}
