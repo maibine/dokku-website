@@ -206,12 +206,12 @@ jobs:
         run: |
           docker pull ghcr.io/fluentis-doc/translate-action:latest
           docker run --rm \
-            -v ${{ github.workspace }}:/workspace \
+            -v "${{ github.workspace }}":"/github/workspace" \
             ghcr.io/fluentis-doc/translate-action:latest \
-            new_files_list.txt \
-            ./ \
-            ${{ matrix.lang }} \
-            ${{ secrets.OPENAI_API_KEY }}
+            "new_files_list.txt" \
+            "./" \
+            "${{ matrix.lang }}" \
+            "${{ secrets.OPENAI_API_KEY }}"
 
       - name: Create translation branch and prepend language code
         run: |
