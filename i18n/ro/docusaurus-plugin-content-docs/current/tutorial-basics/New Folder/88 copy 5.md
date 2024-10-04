@@ -1,4 +1,3 @@
-ro
 ---
 sidebar_position: 2
 ---
