@@ -201,14 +201,14 @@ jobs:
             "${{ matrix.lang }}" \
             "${{ secrets.OPENAI_API_KEY }}"
       
-      - name: Call action to process translations #unauthorized if private
-        #uses: docker://ghcr.io/fluentis-doc/translate-action:latest
-        uses: fluentis-doc/utils/TranslateActionSolution@main #doesn't work because repo is private
-        with:
-          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
-          lang: ${{ matrix.lang }}
-          files_list: 'new_files_list.txt'
-          repo_dir: './'
+      # - name: Call action to process translations #unauthorized if private
+      #   #uses: docker://ghcr.io/fluentis-doc/translate-action:latest
+      #   uses: fluentis-doc/utils/TranslateActionSolution@main #doesn't work because repo is private
+      #   with:
+      #     openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+      #     lang: ${{ matrix.lang }}
+      #     files_list: 'new_files_list.txt'
+      #     repo_dir: './'
 
       # - name: Authenticate with GitHub Container Registry
       #   run: echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
