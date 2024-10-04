@@ -191,9 +191,19 @@ jobs:
           name: new-files-list
           path: new_files_list.txt  # This will download the file as new_files_list.txt in the workspace
 
+      
       - name: Call Docker action to process translations #unauthorized if private
+        uses: docker://ghcr.io/fluentis-doc/translate-action:latest
+        with:
+          args: |
+            "new_files_list.txt" \
+            "./" \
+            "${{ matrix.lang }}" \
+            "${{ secrets.OPENAI_API_KEY }}"
+      
+      - name: Call action to process translations #unauthorized if private
         #uses: docker://ghcr.io/fluentis-doc/translate-action:latest
-        uses: fluentis-doc/utils/TranslateActionSolution@main
+        uses: fluentis-doc/utils/TranslateActionSolution@main #doesn't work because repo is private
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           lang: ${{ matrix.lang }}
@@ -208,6 +218,8 @@ jobs:
       #     docker pull ghcr.io/fluentis-doc/translate-action:latest
       #     docker run --rm \
       #       -v "${{ github.workspace }}":"/github/workspace" \
+      #       -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \    #env variables
+      #       -e LANG=${{ matrix.lang }} \
       #       ghcr.io/fluentis-doc/translate-action:latest \
       #       "new_files_list.txt" \
       #       "./" \
