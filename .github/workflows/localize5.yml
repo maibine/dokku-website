@@ -189,12 +189,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: new-files-list
-          path: new_files_list.txt  # This will download the file as new_files_list.txt in the workspace
+          path: ./ # This ensures it downloads to the current directory as a file, not a directory
 
       - name: Verify downloaded artifact
         run: |
           ls -la
-          file new_files_list.txt
+          if [ -d new_files_list.txt ]; then
+            echo "Error: new_files_list.txt is a directory!"
+            exit 1
+          fi
+          echo "new_files_list.txt is correctly downloaded as a file"
           cat new_files_list.txt
       
       - name: Call Docker action to process translations #unauthorized if private
