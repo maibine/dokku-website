@@ -191,27 +191,27 @@ jobs:
           name: new-files-list
           path: new_files_list.txt  # This will download the file as new_files_list.txt in the workspace
 
-      - name: Authenticate with GitHub Container Registry
-        run: echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Call Docker action to process translations #unauthorized if private
+        uses: docker://ghcr.io/fluentis-doc/translate-action:latest
+        with:
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          lang: ${{ matrix.lang }}
+          files_list: 'new_files_list.txt'
+          repo_dir: './'
 
-      # - name: Call Docker action to process translations #unauthorized
-      #   uses: docker://ghcr.io/fluentis-doc/translate-action:latest
-      #   with:
-      #     openai_api_key: ${{ secrets.OPENAI_API_KEY }}
-      #     lang: ${{ matrix.lang }}
-      #     files_list: 'new_files_list.txt'
-      #     repo_dir: './'
-      
-      - name: Run Docker action to process translations
-        run: |
-          docker pull ghcr.io/fluentis-doc/translate-action:latest
-          docker run --rm \
-            -v "${{ github.workspace }}":"/github/workspace" \
-            ghcr.io/fluentis-doc/translate-action:latest \
-            "new_files_list.txt" \
-            "./" \
-            "${{ matrix.lang }}" \
-            "${{ secrets.OPENAI_API_KEY }}"
+      # - name: Authenticate with GitHub Container Registry
+      #   run: echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      # - name: Run Docker action to process translations
+      #   run: |
+      #     docker pull ghcr.io/fluentis-doc/translate-action:latest
+      #     docker run --rm \
+      #       -v "${{ github.workspace }}":"/github/workspace" \
+      #       ghcr.io/fluentis-doc/translate-action:latest \
+      #       "new_files_list.txt" \
+      #       "./" \
+      #       "${{ matrix.lang }}" \
+      #       "${{ secrets.OPENAI_API_KEY }}"
 
       - name: Create translation branch and prepend language code
         run: |
