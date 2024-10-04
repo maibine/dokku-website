@@ -193,12 +193,10 @@ jobs:
       - name: Call Docker action to process translations
         uses: docker://ghcr.io/fluentis-doc/translate-action:latest
         with:
-          args:
-            - new_files_list.txt                               # Pass the downloaded file containing new files
-            - ${{ github.workspace }}                          # Pass the repository directory
-            - ${{ matrix.lang }}                               # Pass the current language
-            - ${{ secrets.OPENAI_API_KEY }}                    # Pass the OpenAI API key stored in secrets
-  
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          lang: ${{ matrix.lang }}
+          files_list: 'new_files_list.txt'
+          repo_dir: './'
 
       - name: Create translation branch and prepend language code
         run: |
