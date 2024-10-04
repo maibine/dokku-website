@@ -191,13 +191,18 @@ jobs:
           name: new-files-list
           path: new_files_list.txt  # This will download the file as new_files_list.txt in the workspace
 
+      - name: Verify downloaded artifact
+        run: |
+          ls -la
+          file new_files_list.txt
+          cat new_files_list.txt
       
       - name: Call Docker action to process translations #unauthorized if private
         uses: docker://ghcr.io/fluentis-doc/translate-action:latest
         with:
           args: |
             "new_files_list.txt" \
-            "./" \
+            "/github/workspace" \
             "${{ matrix.lang }}" \
             "${{ secrets.OPENAI_API_KEY }}"
       
