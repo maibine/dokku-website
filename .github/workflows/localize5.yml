@@ -206,7 +206,7 @@ jobs:
         with:
           args: |
             "new_files_list.txt" \
-            "/github/workspace" \
+            "./" \
             "${{ matrix.lang }}" \
             "${{ secrets.OPENAI_API_KEY }}"
       
