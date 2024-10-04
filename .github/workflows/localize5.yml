@@ -178,6 +178,7 @@ jobs:
           # Write BRANCH_NAME and COMMIT_MESSAGE to GITHUB_ENV for use in subsequent steps
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
           echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
+          echo "Actor: ${{ github.actor }}" 
        
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -189,6 +190,10 @@ jobs:
         with:
           name: new-files-list
           path: new_files_list.txt  # This will download the file as new_files_list.txt in the workspace
+
+      - name: Authenticate with GitHub Container Registry
+        run: echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
 
       - name: Call Docker action to process translations
         uses: docker://ghcr.io/fluentis-doc/translate-action:latest
