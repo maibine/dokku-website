@@ -96,10 +96,12 @@ jobs:
             echo "new-files=$new_files" >> $GITHUB_OUTPUT
           else
             echo "No new files to process."
+            echo "new-files=" >> $GITHUB_OUTPUT  # Set new-files as empty
             exit 0
           fi
         # Upload the new files list as an artifact
       - name: Upload new files list artifact
+        if: ${{ steps.detect-new-files.outputs.new-files != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: new-files-list
@@ -151,7 +153,7 @@ jobs:
     needs: 
       - check-doc-changes
       - copy-original
-    if: needs.check-doc-changes.outputs.docs_changed == 'true'  # Reference docs_changed from check-doc-changes job
+    if: needs.check-doc-changes.outputs.docs_changed == 'true'  &&  needs.copy-original.outputs.new-files != '' # Reference docs_changed from check-doc-changes job
     runs-on: ubuntu-latest
 
     permissions:
@@ -202,7 +204,7 @@ jobs:
           cat new_files_list.txt
       
       - name: Debug i18n folder
-        run: ls -la /i18n/it/docusaurus-plugin-content-docs/current/tutorial-basics/New\ Folder
+        run: ls -la i18n/it/docusaurus-plugin-content-docs/current/tutorial-basics/New\ Folder
 
       - name: Call Docker action to process translations #unauthorized if private
         uses: docker://ghcr.io/fluentis-doc/translate-action:latest
