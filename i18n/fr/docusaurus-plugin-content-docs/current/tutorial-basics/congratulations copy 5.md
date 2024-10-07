@@ -2,23 +2,23 @@
 sidebar_position: 6
 ---
 
-# Congratulations!
+# Félicitations ! (Congratulations!)
 
-You have just learned the **basics of Docusaurus** and made some changes to the **initial template**.
+Vous venez d'apprendre les **bases de Docusaurus** et d'apporter quelques modifications au **modèle initial**.
 
-Docusaurus has **much more to offer**!
+Docusaurus a **bien plus à offrir** ! 
 
-Have **5 more minutes**? Take a look at **[versioning](../tutorial-extras/manage-docs-versions.md)** and **[i18n](../tutorial-extras/translate-your-site.md)**.
+Vous avez **5 minutes de plus** ? Jetez un œil à **[la gestion des versions](../tutorial-extras/manage-docs-versions.md)** et à **[i18n](../tutorial-extras/translate-your-site.md)**.
 
-Anything **unclear** or **buggy** in this tutorial? [Please report it!](https://github.com/facebook/docusaurus/discussions/4610)
+Quelque chose d'**incertain** ou de **buggy** dans ce tutoriel ? [Veuillez le signaler !](https://github.com/facebook/docusaurus/discussions/4610)
 
-## What's next?
+## Et ensuite ? (What's next?)
 
-- Read the [official documentation](https://docusaurus.io/)
-- Modify your site configuration with [`docusaurus.config.js`](https://docusaurus.io/docs/api/docusaurus-config)
-- Add navbar and footer items with [`themeConfig`](https://docusaurus.io/docs/api/themes/configuration)
-- Add a custom [Design and Layout](https://docusaurus.io/docs/styling-layout)
-- Add a [search bar](https://docusaurus.io/docs/search)
-- Find inspirations in the [Docusaurus showcase](https://docusaurus.io/showcase)
-- Get involved in the [Docusaurus Community](https://docusaurus.io/community/support)
-- Find a way to automatically add the main content into the corresponding localization files
+- Lisez la [documentation officielle](https://docusaurus.io/)
+- Modifiez la configuration de votre site avec [`docusaurus.config.js`](https://docusaurus.io/docs/api/docusaurus-config)
+- Ajoutez des éléments de barre de navigation et de pied de page avec [`themeConfig`](https://docusaurus.io/docs/api/themes/configuration)
+- Ajoutez un [Design et mise en page](https://docusaurus.io/docs/styling-layout) personnalisé
+- Ajoutez une [barre de recherche](https://docusaurus.io/docs/search)
+- Trouvez l'inspiration dans la [vitrine Docusaurus](https://docusaurus.io/showcase)
+- Impliquez-vous dans la [communauté Docusaurus](https://docusaurus.io/community/support)
+- Trouvez un moyen d'ajouter automatiquement le contenu principal dans les fichiers de localisation correspondants.

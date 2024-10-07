@@ -2,16 +2,16 @@
 sidebar_position: 2
 ---
 
-# Creaza un document nou
+# Créez un nouveau document (Creaza un document nou)
 
-Documentele sunt **grupuri de pagini** conectate prin:
+Les documents sont des **groupes de pages** connectés par :
 
-- un **sidebar**
-- **nvaigare anterioara/urmatoare**
-- **versionare**
+- une **barre latérale (sidebar)**
+- une **navigation précédente/suivante (nvaigare anterioara/urmatoare)**
+- **versionnage (versionare)**
 
-## Creaza cel de-al doilea document
+## Créez le deuxième document (Creaza cel de-al doilea document)
 
 ```md title="docs/hello.md"
-# Bună new 4
+# Bonjour nouvelle 4 (Bună new 4)
 ```
