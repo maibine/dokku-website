@@ -202,7 +202,7 @@ jobs:
           cat new_files_list.txt
       
       - name: Debug i18n folder
-        run: ls -la /github/workspace/i18n/it/docusaurus-plugin-content-docs/current/tutorial-basics/New\ Folder
+        run: ls -la /i18n/it/docusaurus-plugin-content-docs/current/tutorial-basics/New\ Folder
 
       - name: Call Docker action to process translations #unauthorized if private
         uses: docker://ghcr.io/fluentis-doc/translate-action:latest
