@@ -162,7 +162,7 @@ jobs:
 
     strategy:
       matrix:
-        //lang: ${{ fromJson(needs.copy-original.outputs.languages) }} # Dynamically use detected languages
+        #lang: ${{ fromJson(needs.copy-original.outputs.languages) }} # Dynamically use detected languages
         lang: ["fr", "ro"]
 
     steps:
