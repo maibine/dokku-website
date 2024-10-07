@@ -2,23 +2,23 @@
 sidebar_position: 6
 ---
 
-# Congratulations!
+# Felicitări! (Congratulations!)
 
-You have just learned the **basics of Docusaurus** and made some changes to the **initial template**.
+Ați învățat **bazeale Docusaurus** (the **basics of Docusaurus**) și ați făcut câteva modificări la **șablonul inițial** (the **initial template**).
 
-Docusaurus has **much more to offer**!
+Docusaurus are **mult mai multe de oferit** (much more to offer)!
 
-Have **5 more minutes**? Take a look at **[versioning](../tutorial-extras/manage-docs-versions.md)** and **[i18n](../tutorial-extras/translate-your-site.md)**.
+Aveți **5 minute în plus**? Aruncați o privire asupra **[versiunilor](../tutorial-extras/manage-docs-versions.md)** (versioning) și **[i18n](../tutorial-extras/translate-your-site.md)** (i18n).
 
-Anything **unclear** or **buggy** in this tutorial? [Please report it!](https://github.com/facebook/docusaurus/discussions/4610)
+Orice lucru **neclar** (unclear) sau **cu buguri** (buggy) în acest tutorial? [Vă rugăm să raportați!](https://github.com/facebook/docusaurus/discussions/4610)
 
-## What's next?
+## Ce urmează? (What's next?)
 
-- Read the [official documentation](https://docusaurus.io/)
-- Modify your site configuration with [`docusaurus.config.js`](https://docusaurus.io/docs/api/docusaurus-config)
-- Add navbar and footer items with [`themeConfig`](https://docusaurus.io/docs/api/themes/configuration)
-- Add a custom [Design and Layout](https://docusaurus.io/docs/styling-layout)
-- Add a [search bar](https://docusaurus.io/docs/search)
-- Find inspirations in the [Docusaurus showcase](https://docusaurus.io/showcase)
-- Get involved in the [Docusaurus Community](https://docusaurus.io/community/support)
-- Find a way to automatically add the main content into the corresponding localization files
+- Citiți [documentația oficială](https://docusaurus.io/)
+- Modificați configurarea site-ului dvs. cu [`docusaurus.config.js`](https://docusaurus.io/docs/api/docusaurus-config)
+- Adăugați elemente la bara de navigare și la subsol cu [`themeConfig`](https://docusaurus.io/docs/api/themes/configuration)
+- Adăugați un [design și un layout personalizat](https://docusaurus.io/docs/styling-layout)
+- Adăugați un [caută](https://docusaurus.io/docs/search)
+- Găsiți inspirații în [vitrinele Docusaurus](https://docusaurus.io/showcase)
+- Implicați-vă în [Comunitatea Docusaurus](https://docusaurus.io/community/support)
+- Găsiți o modalitate de a adăuga automat conținutul principal în fișierele corespunzătoare de localizare
