@@ -30,28 +30,56 @@ jobs:
           echo "Detected languages: $languages_json"
           echo "languages=$languages_json" >> $GITHUB_OUTPUT
 
-      - name: Detect Deleted and Renamed/Moved Files
-        id: detect_changes
+      - name: Get modified, deleted, and renamed .md files from the last commit
+        id: get-files
         run: |
-          # Detect deleted files
-          DELETED_FILES=$(git diff --name-status HEAD^1 HEAD | grep '^D' | awk '{print $2}' | grep '^docs/' || true)
-          echo "Deleted files: $DELETED_FILES"
+          # Check if the commit message indicates a merge pull request
+          MERGE_MESSAGE=$(git log -1 --pretty=%B)
 
-          # Detect renamed/moved files
-          RENAMED_FILES=$(git diff --name-status HEAD^1 HEAD | grep '^R' | awk '{print $3}' | grep '^docs/' || true)
-          echo "Renamed/Moved files: $RENAMED_FILES"
+          if [[ "$MERGE_MESSAGE" == *"Merge pull request"* ]]; then
+              echo "This is a pull request merge."
 
-          # Write the file lists to environment files
-          echo "DELETED_FILES=$DELETED_FILES" >> $GITHUB_ENV
-          echo "RENAMED_FILES=$RENAMED_FILES" >> $GITHUB_ENV
+              # Check if the commit was a fast-forward
+              PARENT_COUNT=$(git rev-list --count --parents -n 1 HEAD | awk '{print NF-1}')
+              if [ "$PARENT_COUNT" -eq 1 ]; then
+                  echo "This was a fast-forward merge."
+
+                  # Use the regular approach since it's a fast-forward merge
+                  DELETED_FILES=$(git diff-tree -M --no-commit-id --name-status -r HEAD | grep -E '^D\s.*\.md$' | awk '{print $2}' | grep '^docs/' || true)
+                  RENAMED_FILES=$(git diff-tree -M --no-commit-id --name-status -r HEAD | grep -E '^R\s.*\.md$' | awk '{print $3}' | grep '^docs/' || true)
+              else
+                  # Not a fast-forward, use the original merge diff logic
+                  DELETED_FILES=$(git diff --name-status HEAD^1 HEAD | grep -E '^D\s.*\.md$' | awk '{print $2}' | grep '^docs/' || true)
+                  RENAMED_FILES=$(git diff --name-status HEAD^1 HEAD | grep -E '^R.*\.md$' | awk '{print $3}' | grep '^docs/' || true)
+              fi
+          else
+              echo "This is a regular commit."
+              # Use the regular approach
+              DELETED_FILES=$(git diff-tree -M --no-commit-id --name-status -r HEAD | grep -E '^D\s.*\.md$' | awk '{print $2}' | grep '^docs/' || true)
+              RENAMED_FILES=$(git diff-tree -M --no-commit-id --name-status -r HEAD | grep -E '^R\s.*\.md$' | awk '{print $3}' | grep '^docs/' || true)
+          fi
+
+          # Set environment variables for deleted and renamed files
+          if [ -n "$DELETED_FILES" ]; then
+              DELETED_FILES=$(echo "$DELETED_FILES" | tr '\n' ' ')
+              echo "deleted_files=$DELETED_FILES" >> $GITHUB_ENV
+          fi
+
+          if [ -n "$RENAMED_FILES" ]; then
+              RENAMED_FILES=$(echo "$RENAMED_FILES" | tr '\n' ' ')
+              echo "renamed_files=$RENAMED_FILES" >> $GITHUB_ENV
+          fi
+
+          echo "Deleted files: \"$DELETED_FILES\""
+          echo "Renamed/Moved files: \"$RENAMED_FILES\""
 
       - name: Sync Deleted Files in Localization Folders
-        if: env.DELETED_FILES != ''
+        if: env.deleted_files != ''
         run: |
           # Strip the JSON array format (remove brackets and quotes) to get the language list
           for lang in $(echo "${{ steps.detect-languages.outputs.languages }}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/"//g' | tr ',' ' '); do
             echo "Processing language: $lang"
-            for FILE in $DELETED_FILES; do
+            for FILE in $deleted_files; do
               LOCALIZATION_FILE="i18n/$lang/docusaurus-plugin-content-docs/current/${FILE#docs/}"
 
               # Check if the file exists in the localization folder, then delete it
@@ -63,12 +91,12 @@ jobs:
           done
 
       - name: Sync Renamed/Moved Files in Localization Folders
-        if: env.RENAMED_FILES != ''
+        if: env.renamed_files != ''
         run: |
           # Strip the JSON array format (remove brackets and quotes) to get the language list
           for lang in $(echo "${{ steps.detect-languages.outputs.languages }}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/"//g' | tr ',' ' '); do
             echo "Processing language: $lang"
-            for FILE in $RENAMED_FILES; do
+            for FILE in $renamed_files; do
               OLD_FILE=$(git diff --name-status HEAD^1 HEAD | grep '^R' | awk '{print $2}' | grep '^docs/')
               OLD_LOCALIZATION_FILE="i18n/$lang/docusaurus-plugin-content-docs/current/${OLD_FILE#docs/}"
               NEW_LOCALIZATION_FILE="i18n/$lang/docusaurus-plugin-content-docs/current/${FILE#docs/}"
