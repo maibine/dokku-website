@@ -1,0 +1,91 @@
+name: Sync Deleted and Renamed Files in Localization Folder
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'  # Trigger only if files in the docs folder are changed
+
+jobs:
+  sync-files:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Allows pushing commits to the repository
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch the full history to detect changes properly
+
+      - name: Detect languages from i18n folder
+        id: detect-languages
+        run: |
+          # Detect the languages by listing directories under i18n/ with names that are exactly 2 or 5 characters long
+          languages=$(find i18n -mindepth 1 -maxdepth 1 -type d | xargs -n 1 basename | grep -E '^.{2}$|^.{5}$')
+
+          # Format the languages as a JSON array (single array, handle multiple lines correctly)
+          languages_json=$(echo "$languages" | tr '\n' ' ' | awk '{printf "[\"%s\"", $1; for(i=2;i<=NF;i++) printf ",\"%s\"", $i; print "]"}')
+
+          echo "Detected languages: $languages_json"
+          echo "languages=$languages_json" >> $GITHUB_OUTPUT
+
+      - name: Detect Deleted and Renamed/Moved Files
+        id: detect_changes
+        run: |
+          # Detect deleted files
+          DELETED_FILES=$(git diff --name-status HEAD^1 HEAD | grep '^D' | awk '{print $2}' | grep '^docs/' || true)
+          echo "Deleted files: $DELETED_FILES"
+
+          # Detect renamed/moved files
+          RENAMED_FILES=$(git diff --name-status HEAD^1 HEAD | grep '^R' | awk '{print $3}' | grep '^docs/' || true)
+          echo "Renamed/Moved files: $RENAMED_FILES"
+
+          # Write the file lists to environment files
+          echo "DELETED_FILES=$DELETED_FILES" >> $GITHUB_ENV
+          echo "RENAMED_FILES=$RENAMED_FILES" >> $GITHUB_ENV
+
+      - name: Sync Deleted Files in Localization Folders
+        if: env.DELETED_FILES != ''
+        run: |
+          # Strip the JSON array format (remove brackets and quotes) to get the language list
+          for lang in $(echo "${{ steps.detect-languages.outputs.languages }}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/"//g' | tr ',' ' '); do
+            echo "Processing language: $lang"
+            for FILE in $DELETED_FILES; do
+              LOCALIZATION_FILE="i18n/$lang/docusaurus-plugin-content-docs/current/${FILE#docs/}"
+
+              # Check if the file exists in the localization folder, then delete it
+              if [ -f "$LOCALIZATION_FILE" ]; then
+                git rm "$LOCALIZATION_FILE"
+                echo "Deleted $LOCALIZATION_FILE for $lang"
+              fi
+            done
+          done
+
+      - name: Sync Renamed/Moved Files in Localization Folders
+        if: env.RENAMED_FILES != ''
+        run: |
+          # Strip the JSON array format (remove brackets and quotes) to get the language list
+          for lang in $(echo "${{ steps.detect-languages.outputs.languages }}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/"//g' | tr ',' ' '); do
+            echo "Processing language: $lang"
+            for FILE in $RENAMED_FILES; do
+              OLD_FILE=$(git diff --name-status HEAD^1 HEAD | grep '^R' | awk '{print $2}' | grep '^docs/')
+              OLD_LOCALIZATION_FILE="i18n/$lang/docusaurus-plugin-content-docs/current/${OLD_FILE#docs/}"
+              NEW_LOCALIZATION_FILE="i18n/$lang/docusaurus-plugin-content-docs/current/${FILE#docs/}"
+
+              # Rename the corresponding file in the localization folder
+              if [ -f "$OLD_LOCALIZATION_FILE" ]; then
+                git mv "$OLD_LOCALIZATION_FILE" "$NEW_LOCALIZATION_FILE"
+                echo "Renamed $OLD_LOCALIZATION_FILE to $NEW_LOCALIZATION_FILE for $lang"
+              fi
+            done
+          done
+
+      - name: Commit and Push Changes to Main
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          git add i18n/
+          git commit -m "Sync deleted/renamed files in localization folders"
+          git push origin main
