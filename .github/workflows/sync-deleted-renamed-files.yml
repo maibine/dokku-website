@@ -46,7 +46,7 @@ jobs:
 
                   # Use the regular approach since it's a fast-forward merge
                   DELETED_FILES=$(git diff-tree -M --no-commit-id --name-status -r HEAD | grep -E '^D\s.*\.md$' | awk '{print $2}' | grep '^docs/' || true)
-                  RENAMED_FILES=$(git diff-tree -M --no-commit-id --name-status -r HEAD | grep -E '^R\s.*\.md$' | awk '{print $3}' | grep '^docs/' || true)
+                  RENAMED_FILES=$(git diff-tree -M --no-commit-id --name-status -r HEAD | grep -E '^R.*\.md$' | awk '{print $3}' | grep '^docs/' || true)
               else
                   # Not a fast-forward, use the original merge diff logic
                   DELETED_FILES=$(git diff --name-status HEAD^1 HEAD | grep -E '^D\s.*\.md$' | awk '{print $2}' | grep '^docs/' || true)
@@ -56,7 +56,7 @@ jobs:
               echo "This is a regular commit."
               # Use the regular approach
               DELETED_FILES=$(git diff-tree -M --no-commit-id --name-status -r HEAD | grep -E '^D\s.*\.md$' | awk '{print $2}' | grep '^docs/' || true)
-              RENAMED_FILES=$(git diff-tree -M --no-commit-id --name-status -r HEAD | grep -E '^R\s.*\.md$' | awk '{print $3}' | grep '^docs/' || true)
+              RENAMED_FILES=$(git diff-tree -M --no-commit-id --name-status -r HEAD | grep -E '^R.*\.md$' | awk '{print $3}' | grep '^docs/' || true)
           fi
 
           # Set environment variables for deleted and renamed files
