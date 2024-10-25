@@ -58,7 +58,7 @@ jobs:
         id: get-latest-commit
         run: |
           # Get and sanitize the latest commit message
-          LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B main | tr '\n' ' ' | tr -dc '[:alnum:]-_ ')
+          LATEST_COMMIT_MESSAGE=$(git log -1 --pretty=%B | tr '\n' ' ' | tr -dc '[:alnum:]-_ ')
 
           # Replace spaces with hyphens and truncate to a reasonable length for branch name
           SHORT_COMMIT_MESSAGE=$(echo "$LATEST_COMMIT_MESSAGE" | sed 's/ /-/g' | sed 's/--*/-/g' | sed 's/-$//g' | cut -c1-50)
