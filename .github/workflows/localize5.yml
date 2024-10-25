@@ -206,10 +206,7 @@ jobs:
           echo "new_files_list.txt is correctly downloaded as a file"
           cat new_files_list.txt
       
-      - name: Debug i18n folder
-        run: ls -la i18n/${{ matrix.lang }}/docusaurus-plugin-content-docs/current/tutorial-basics/New\ Folder
-
-      - name: Call Docker action to process translations #unauthorized if private
+       - name: Call Docker action to process translations #unauthorized if private
         uses: docker://ghcr.io/fluentis-doc/translate-action:latest
         with:
           args: "new_files_list.txt /github/workspace ${{ matrix.lang }} ${{ secrets.OPENAI_API_KEY }}"
@@ -264,7 +261,7 @@ jobs:
 
           # Commit and push the changes to the new branch
           git add i18n/
-          git commit -m "Prepended language code for locale-${LANG} based on ${COMMIT_MESSAGE}"
+          git commit -m "Automatic translation for locale-${LANG} based on ${COMMIT_MESSAGE}"
           git push origin "$BRANCH_NAME"
 
       - name: Debug commit message
@@ -279,7 +276,7 @@ jobs:
           # Use the BRANCH_NAME and COMMIT_MESSAGE from GITHUB_ENV
 
           # Write the body to a temporary file because of line ending not correctly handled
-          body="This PR contains the translation modifications for the ${{ matrix.lang }} language.\nPlease delete the  ${BRANCH_NAME} after merge."
+          body="This PR contains the automatic translation for the ${{ matrix.lang }} language.\nPlease delete the  ${BRANCH_NAME} after merge."
           temp_file=$(mktemp)
           echo -e "$body" > "$temp_file"
 
