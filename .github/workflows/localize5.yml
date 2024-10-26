@@ -108,22 +108,15 @@ jobs:
           path: new_files_list.txt
 
       - name: Copy files to i18n folders
+        if: ${{ steps.detect-new-files.outputs.new-files != '' }}
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
       
           # Ensure we are up to date with the latest changes from remote
           git fetch origin
-          git pull origin main --rebase
-      
-          # Find new files added in the last commit (use null-delimiter to handle spaces in filenames)
-          new_files=$(git diff --name-status -z origin/main~1 origin/main | grep -z '^A' | cut -zf2-)
-      
-          if [ -z "$new_files" ]; then
-            echo "No new files to copy."
-            exit 0
-          fi
-      
+          git pull origin ${{ github.ref_name }} --rebase
+     
           # Strip the JSON array format (remove brackets and quotes) to get the language list
           for lang in $(echo "${{ steps.detect-languages.outputs.languages }}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/"//g' | tr ',' ' '); do
             echo "Processing language: $lang"
@@ -143,10 +136,10 @@ jobs:
             done
           done
       
-          # Commit the changes to the main branch
+          # Commit the changes to the current branch
           git add i18n/
-          git commit -m "${{ steps.get-latest-commit.outputs.latest-commit-message }} - Add original files for all locales to main branch"
-          git push origin main
+          git commit -m "${{ steps.get-latest-commit.outputs.latest-commit-message }} - Add original files for all locales to ${{ github.ref_name }} branch"
+          git push origin ${{ github.ref_name }}
         
 # Step 2: Prepend language code and create translation branches (matrix mode)
   translate:
@@ -188,7 +181,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: main  # Ensure it fetches the latest main branch
+          #commented because we need the current branch - could be another branch
+          #ref: main  # Ensure it fetches the latest main branch 
 
       - name: Download new files list artifact
         uses: actions/download-artifact@v4
@@ -206,7 +200,7 @@ jobs:
           echo "new_files_list.txt is correctly downloaded as a file"
           cat new_files_list.txt
       
-       - name: Call Docker action to process translations #unauthorized if private
+      - name: Call Docker action to process translations #unauthorized if private
         uses: docker://ghcr.io/fluentis-doc/translate-action:latest
         with:
           args: "new_files_list.txt /github/workspace ${{ matrix.lang }} ${{ secrets.OPENAI_API_KEY }}"
