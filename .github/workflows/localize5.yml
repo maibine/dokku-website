@@ -183,7 +183,13 @@ jobs:
           fetch-depth: 0
           #commented because we need the current branch - could be another branch
           #ref: main  # Ensure it fetches the latest main branch 
-
+      - name: Fetch and reset to latest commit on the current branch
+        run: |
+          git fetch origin
+          git checkout ${{ github.ref_name }}
+          git reset --hard origin/${{ github.ref_name }}  # Ensures we have the latest changes from the previous job
+          git log -4 --pretty=%B
+          
       - name: Download new files list artifact
         uses: actions/download-artifact@v4
         with:
