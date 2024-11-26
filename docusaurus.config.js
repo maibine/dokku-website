@@ -16,7 +16,7 @@ const config = {
   //url: 'https://github.com',
   //baseUrl: '/dokku-website/',
   url: 'https://.pages.dev',
-  baseUrl: '/dokku/', //basepage doesn't matter on Cloudflare??
+  baseUrl: '/', //For URLs that have no path, the baseUrl should be set to / on Cloudflare is required for the URL to work
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   
